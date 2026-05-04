@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { PublicForm } from "@/pages/public-form";
-import { AdminDashboard } from "@/pages/admin-dashboard";
+import { Admin } from "@/pages/admin";
 import { Landing } from "@/pages/landing";
 import { useEffect, useState } from "react";
 
@@ -27,7 +27,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/novo-chamado" component={PublicForm} />
-      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );
