@@ -71,7 +71,7 @@ export function Landing() {
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-6xl md:text-8xl lg:text-[9rem] font-bold tracking-tighter leading-[0.85] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60"
           >
-            O seu suporte. <br/> Elevado.
+            Travou? <br/> Me avisa.
           </motion.h1>
           
           <motion.p 
@@ -80,7 +80,7 @@ export function Landing() {
             transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-xl md:text-3xl text-slate-400 max-w-2xl font-light mb-12 tracking-tight"
           >
-            Quando a tecnologia falha, nós resolvemos. Projetado para manter você focado no que importa.
+            Computador, impressora, internet, sistema. Qualquer coisa que parar, me chama aqui que eu resolvo.
           </motion.p>
 
           <motion.div
@@ -97,27 +97,27 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Section 2: Big Numbers / Promise */}
+      {/* Section 2: How it works */}
       <section className="py-32 md:py-48 px-6 md:px-12 relative">
         <div className="max-w-6xl mx-auto">
           <FadeIn>
             <h2 className="text-4xl md:text-7xl font-bold tracking-tighter mb-24 text-center text-slate-100">
-              Resolução em minutos. <br/> <span className="text-slate-500">Não horas.</span>
+              Simples assim. <br/> <span className="text-slate-500">Sem rodeio.</span>
             </h2>
           </FadeIn>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 text-center">
             {[
-              { num: "98%", label: "Chamados resolvidos no mesmo dia" },
-              { num: "2min", label: "Tempo médio de resposta inicial" },
-              { num: "24/7", label: "Monitoramento contínuo de infraestrutura" }
+              { num: "01", label: "Você abre um chamado contando o que aconteceu" },
+              { num: "02", label: "Eu recebo na hora e já começo a olhar" },
+              { num: "03", label: "Resolvo e te aviso assim que estiver pronto" }
             ].map((stat, i) => (
               <FadeIn key={i} delay={i * 0.1}>
                 <div className="flex flex-col items-center">
                   <div className="text-6xl md:text-8xl font-medium tracking-tighter text-blue-500 mb-4">
                     {stat.num}
                   </div>
-                  <div className="text-lg md:text-xl text-slate-400 font-light max-w-[200px]">
+                  <div className="text-lg md:text-xl text-slate-400 font-light max-w-[220px]">
                     {stat.label}
                   </div>
                 </div>
@@ -133,16 +133,16 @@ export function Landing() {
           <div className="lg:w-1/2">
             <FadeIn>
               <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8">
-                Desempenho. <br/> Invisível, mas presente.
+                Sem dor de cabeça. <br/> Pode deixar comigo.
               </h2>
               <p className="text-xl text-slate-400 font-light leading-relaxed mb-8">
-                Nossa infraestrutura opera nos bastidores para que você nunca precise pensar nela. Redes ultrarrápidas, segurança de ponta a ponta e hardware sempre atualizado.
+                Você não precisa entender o problema, só descrever o que está acontecendo. Eu cuido do resto e te mantenho informado até voltar a funcionar.
               </p>
               <ul className="space-y-6">
                 {[
-                  { icon: Zap, text: "Diagnóstico remoto instantâneo" },
-                  { icon: Shield, text: "Proteção contra ameaças zero-day" },
-                  { icon: Wifi, text: "Conectividade redundante" }
+                  { icon: Zap, text: "Atendimento na ordem que chega" },
+                  { icon: Shield, text: "Você acompanha o status do chamado" },
+                  { icon: Wifi, text: "Aviso assim que terminar" }
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-4 text-lg text-slate-300">
                     <div className="p-2 bg-blue-500/10 rounded-full text-blue-400">
@@ -171,19 +171,19 @@ export function Landing() {
           <FadeIn>
             <div className="text-center mb-24">
               <h2 className="text-4xl md:text-7xl font-bold tracking-tighter mb-6">
-                Um ecossistema <br/> de suporte completo.
+                O que eu resolvo <br/> aqui pra você.
               </h2>
               <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">
-                Não importa onde o problema ocorra, temos as ferramentas e os especialistas para resolver.
+                Se for de TI, pode mandar. Não tem problema pequeno demais.
               </p>
             </div>
           </FadeIn>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: "Hardware", desc: "Substituição e reparo de equipamentos com agilidade.", icon: Monitor },
-              { title: "Software", desc: "Configuração, licenças e resolução de bugs de sistemas.", icon: Lock },
-              { title: "Conectividade", desc: "Estabilidade de rede e acesso VPN seguro em qualquer lugar.", icon: Wifi }
+              { title: "Computador e impressora", desc: "Travou, não liga, não imprime, está lento. Eu vejo o que é e arrumo.", icon: Monitor },
+              { title: "Sistema e programas", desc: "Erro estranho, login que não funciona, programa que não abre. Me chama.", icon: Lock },
+              { title: "Internet e rede", desc: "Wi-Fi caiu, e-mail não envia, VPN não conecta. A gente resolve.", icon: Wifi }
             ].map((card, i) => (
               <FadeIn key={i} delay={i * 0.1}>
                 <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-10 h-full flex flex-col hover:bg-slate-900/80 transition-colors duration-500 group">
@@ -206,10 +206,10 @@ export function Landing() {
           <div className="relative z-10 text-center px-4">
             <FadeIn>
               <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-white mb-4">
-                Transparência do início ao fim.
+                Você fica sabendo de tudo.
               </h2>
               <p className="text-lg md:text-xl text-slate-300 font-light max-w-2xl mx-auto">
-                Acompanhe o status do seu chamado em tempo real. Sem caixas pretas.
+                Acompanha aqui o que está pendente, o que estou olhando agora e o que já resolvi.
               </p>
             </FadeIn>
           </div>
@@ -225,10 +225,10 @@ export function Landing() {
           <FadeIn>
             <Clock className="w-16 h-16 text-blue-500 mx-auto mb-8" />
             <h2 className="text-5xl md:text-8xl font-bold tracking-tighter mb-8 leading-tight">
-              Não deixe um problema <br/> parar o seu dia.
+              Aconteceu algo? <br/> Manda aqui.
             </h2>
             <p className="text-xl md:text-2xl text-slate-400 font-light mb-12">
-              Estamos prontos para ajudar agora mesmo.
+              Já estou de olho. Quanto antes você abrir, antes resolvo.
             </p>
             
             <Link href="/novo-chamado">
@@ -243,11 +243,8 @@ export function Landing() {
       {/* Footer */}
       <footer className="py-12 px-6 md:px-12 border-t border-slate-800/50 text-center text-slate-500 text-sm font-light">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>Central de Suporte TI &copy; {new Date().getFullYear()}</div>
-          <div className="flex gap-6">
-            <span className="hover:text-slate-300 transition-colors cursor-pointer">Privacidade</span>
-            <span className="hover:text-slate-300 transition-colors cursor-pointer">Termos</span>
-          </div>
+          <div>Central de Suporte TI &middot; uso interno</div>
+          <div>{new Date().getFullYear()}</div>
         </div>
       </footer>
     </div>
