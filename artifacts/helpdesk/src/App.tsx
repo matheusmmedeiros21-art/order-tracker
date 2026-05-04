@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { PublicForm } from "@/pages/public-form";
 import { AdminDashboard } from "@/pages/admin-dashboard";
+import { Landing } from "@/pages/landing";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -24,7 +25,8 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={PublicForm} />
+      <Route path="/" component={Landing} />
+      <Route path="/novo-chamado" component={PublicForm} />
       <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>

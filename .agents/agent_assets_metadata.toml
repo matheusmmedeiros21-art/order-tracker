@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "qaFL5rcpNJN5UdgHwFXXq"
+uri = "file://artifacts/helpdesk/src/assets/hero-glow.png"
+type = "image"
+title = "Hero glowing abstract network"
+
+[[generated]]
+id = "Kam1OIE5QTaxxDtmHnpeE"
+uri = "file://artifacts/helpdesk/src/assets/speed-abstract.png"
+type = "image"
+title = "Abstract speed resolution"
+
+[[generated]]
+id = "J_zg-4B8YsW67YnLtZfNT"
+uri = "file://artifacts/helpdesk/src/assets/ecosystem-abstract.png"
+type = "image"
+title = "Abstract ecosystem structure"
