@@ -214,6 +214,104 @@ export const GetTicketAiSummaryResponse = zod.object({
 });
 
 /**
+ * @summary Suggest a reply to the ticket requester
+ */
+export const GetTicketAiSuggestedReplyParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetTicketAiSuggestedReplyResponse = zod.object({
+  ticketId: zod.number(),
+  reply: zod.string(),
+});
+
+/**
+ * @summary Auto-classify a ticket from its description (and optional screenshot)
+ */
+export const AiClassifyTicketBody = zod.object({
+  description: zod.string(),
+  screenshotUrl: zod.string().nullish(),
+});
+
+export const AiClassifyTicketResponse = zod.object({
+  category: zod.enum([
+    "computer",
+    "printer",
+    "network",
+    "software",
+    "phone",
+    "other",
+  ]),
+  priority: zod.enum(["low", "medium", "high", "urgent"]),
+  suggestedTitle: zod.string(),
+  reasoning: zod.string(),
+});
+
+/**
+ * @summary Rewrite the user's description in clearer technical language
+ */
+export const AiImproveDescriptionBody = zod.object({
+  text: zod.string(),
+});
+
+export const AiImproveDescriptionResponse = zod.object({
+  improved: zod.string(),
+});
+
+/**
+ * @summary Find existing open tickets that look like the proposed new one
+ */
+export const AiFindDuplicatesBody = zod.object({
+  description: zod.string(),
+  category: zod.string().nullish(),
+});
+
+export const AiFindDuplicatesResponse = zod.object({
+  matches: zod.array(
+    zod.object({
+      ticketId: zod.number(),
+      requesterName: zod.string(),
+      descriptionExcerpt: zod.string(),
+      status: zod.string(),
+      score: zod.number(),
+      reason: zod.string(),
+    }),
+  ),
+});
+
+/**
+ * @summary AI-generated dashboard insights for the admin
+ */
+export const AiGetInsightsResponse = zod.object({
+  generatedAt: zod.coerce.date(),
+  headline: zod.string(),
+  items: zod.array(
+    zod.object({
+      kind: zod.enum(["trend", "alert", "suggestion", "summary"]),
+      title: zod.string(),
+      body: zod.string(),
+      ticketIds: zod.array(zod.number()).optional(),
+    }),
+  ),
+});
+
+/**
+ * @summary FAQ chat assistant about IT support and the AnyDesk tutorial
+ */
+export const AiChatBody = zod.object({
+  messages: zod.array(
+    zod.object({
+      role: zod.enum(["user", "assistant"]),
+      content: zod.string(),
+    }),
+  ),
+});
+
+export const AiChatResponse = zod.object({
+  reply: zod.string(),
+});
+
+/**
  * @summary Get a single ticket
  */
 export const GetTicketParams = zod.object({

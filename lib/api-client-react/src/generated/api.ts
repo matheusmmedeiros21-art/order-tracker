@@ -17,6 +17,16 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AiChatBody,
+  AiChatResult,
+  AiClassifyBody,
+  AiClassifyResult,
+  AiFindDuplicatesBody,
+  AiFindDuplicatesResult,
+  AiImproveBody,
+  AiImproveResult,
+  AiInsights,
+  AiSuggestedReply,
   CreateTicketBody,
   HealthStatus,
   ListTicketsParams,
@@ -618,6 +628,509 @@ export const useGetTicketAiSummary = <
   TContext
 > => {
   return useMutation(getGetTicketAiSummaryMutationOptions(options));
+};
+
+/**
+ * @summary Suggest a reply to the ticket requester
+ */
+export const getGetTicketAiSuggestedReplyUrl = (id: number) => {
+  return `/api/tickets/${id}/ai-suggest-reply`;
+};
+
+export const getTicketAiSuggestedReply = async (
+  id: number,
+  options?: RequestInit,
+): Promise<AiSuggestedReply> => {
+  return customFetch<AiSuggestedReply>(getGetTicketAiSuggestedReplyUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getGetTicketAiSuggestedReplyMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getTicketAiSuggestedReply>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof getTicketAiSuggestedReply>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["getTicketAiSuggestedReply"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof getTicketAiSuggestedReply>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return getTicketAiSuggestedReply(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GetTicketAiSuggestedReplyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof getTicketAiSuggestedReply>>
+>;
+
+export type GetTicketAiSuggestedReplyMutationError = ErrorType<void>;
+
+/**
+ * @summary Suggest a reply to the ticket requester
+ */
+export const useGetTicketAiSuggestedReply = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getTicketAiSuggestedReply>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof getTicketAiSuggestedReply>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getGetTicketAiSuggestedReplyMutationOptions(options));
+};
+
+/**
+ * @summary Auto-classify a ticket from its description (and optional screenshot)
+ */
+export const getAiClassifyTicketUrl = () => {
+  return `/api/ai/classify`;
+};
+
+export const aiClassifyTicket = async (
+  aiClassifyBody: AiClassifyBody,
+  options?: RequestInit,
+): Promise<AiClassifyResult> => {
+  return customFetch<AiClassifyResult>(getAiClassifyTicketUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(aiClassifyBody),
+  });
+};
+
+export const getAiClassifyTicketMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiClassifyTicket>>,
+    TError,
+    { data: BodyType<AiClassifyBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof aiClassifyTicket>>,
+  TError,
+  { data: BodyType<AiClassifyBody> },
+  TContext
+> => {
+  const mutationKey = ["aiClassifyTicket"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof aiClassifyTicket>>,
+    { data: BodyType<AiClassifyBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return aiClassifyTicket(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AiClassifyTicketMutationResult = NonNullable<
+  Awaited<ReturnType<typeof aiClassifyTicket>>
+>;
+export type AiClassifyTicketMutationBody = BodyType<AiClassifyBody>;
+export type AiClassifyTicketMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Auto-classify a ticket from its description (and optional screenshot)
+ */
+export const useAiClassifyTicket = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiClassifyTicket>>,
+    TError,
+    { data: BodyType<AiClassifyBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof aiClassifyTicket>>,
+  TError,
+  { data: BodyType<AiClassifyBody> },
+  TContext
+> => {
+  return useMutation(getAiClassifyTicketMutationOptions(options));
+};
+
+/**
+ * @summary Rewrite the user's description in clearer technical language
+ */
+export const getAiImproveDescriptionUrl = () => {
+  return `/api/ai/improve-description`;
+};
+
+export const aiImproveDescription = async (
+  aiImproveBody: AiImproveBody,
+  options?: RequestInit,
+): Promise<AiImproveResult> => {
+  return customFetch<AiImproveResult>(getAiImproveDescriptionUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(aiImproveBody),
+  });
+};
+
+export const getAiImproveDescriptionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiImproveDescription>>,
+    TError,
+    { data: BodyType<AiImproveBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof aiImproveDescription>>,
+  TError,
+  { data: BodyType<AiImproveBody> },
+  TContext
+> => {
+  const mutationKey = ["aiImproveDescription"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof aiImproveDescription>>,
+    { data: BodyType<AiImproveBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return aiImproveDescription(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AiImproveDescriptionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof aiImproveDescription>>
+>;
+export type AiImproveDescriptionMutationBody = BodyType<AiImproveBody>;
+export type AiImproveDescriptionMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Rewrite the user's description in clearer technical language
+ */
+export const useAiImproveDescription = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiImproveDescription>>,
+    TError,
+    { data: BodyType<AiImproveBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof aiImproveDescription>>,
+  TError,
+  { data: BodyType<AiImproveBody> },
+  TContext
+> => {
+  return useMutation(getAiImproveDescriptionMutationOptions(options));
+};
+
+/**
+ * @summary Find existing open tickets that look like the proposed new one
+ */
+export const getAiFindDuplicatesUrl = () => {
+  return `/api/ai/find-duplicates`;
+};
+
+export const aiFindDuplicates = async (
+  aiFindDuplicatesBody: AiFindDuplicatesBody,
+  options?: RequestInit,
+): Promise<AiFindDuplicatesResult> => {
+  return customFetch<AiFindDuplicatesResult>(getAiFindDuplicatesUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(aiFindDuplicatesBody),
+  });
+};
+
+export const getAiFindDuplicatesMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiFindDuplicates>>,
+    TError,
+    { data: BodyType<AiFindDuplicatesBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof aiFindDuplicates>>,
+  TError,
+  { data: BodyType<AiFindDuplicatesBody> },
+  TContext
+> => {
+  const mutationKey = ["aiFindDuplicates"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof aiFindDuplicates>>,
+    { data: BodyType<AiFindDuplicatesBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return aiFindDuplicates(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AiFindDuplicatesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof aiFindDuplicates>>
+>;
+export type AiFindDuplicatesMutationBody = BodyType<AiFindDuplicatesBody>;
+export type AiFindDuplicatesMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Find existing open tickets that look like the proposed new one
+ */
+export const useAiFindDuplicates = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiFindDuplicates>>,
+    TError,
+    { data: BodyType<AiFindDuplicatesBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof aiFindDuplicates>>,
+  TError,
+  { data: BodyType<AiFindDuplicatesBody> },
+  TContext
+> => {
+  return useMutation(getAiFindDuplicatesMutationOptions(options));
+};
+
+/**
+ * @summary AI-generated dashboard insights for the admin
+ */
+export const getAiGetInsightsUrl = () => {
+  return `/api/ai/insights`;
+};
+
+export const aiGetInsights = async (
+  options?: RequestInit,
+): Promise<AiInsights> => {
+  return customFetch<AiInsights>(getAiGetInsightsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getAiGetInsightsQueryKey = () => {
+  return [`/api/ai/insights`] as const;
+};
+
+export const getAiGetInsightsQueryOptions = <
+  TData = Awaited<ReturnType<typeof aiGetInsights>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof aiGetInsights>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAiGetInsightsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof aiGetInsights>>> = ({
+    signal,
+  }) => aiGetInsights({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof aiGetInsights>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type AiGetInsightsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof aiGetInsights>>
+>;
+export type AiGetInsightsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary AI-generated dashboard insights for the admin
+ */
+
+export function useAiGetInsights<
+  TData = Awaited<ReturnType<typeof aiGetInsights>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof aiGetInsights>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getAiGetInsightsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary FAQ chat assistant about IT support and the AnyDesk tutorial
+ */
+export const getAiChatUrl = () => {
+  return `/api/ai/chat`;
+};
+
+export const aiChat = async (
+  aiChatBody: AiChatBody,
+  options?: RequestInit,
+): Promise<AiChatResult> => {
+  return customFetch<AiChatResult>(getAiChatUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(aiChatBody),
+  });
+};
+
+export const getAiChatMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiChat>>,
+    TError,
+    { data: BodyType<AiChatBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof aiChat>>,
+  TError,
+  { data: BodyType<AiChatBody> },
+  TContext
+> => {
+  const mutationKey = ["aiChat"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof aiChat>>,
+    { data: BodyType<AiChatBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return aiChat(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AiChatMutationResult = NonNullable<
+  Awaited<ReturnType<typeof aiChat>>
+>;
+export type AiChatMutationBody = BodyType<AiChatBody>;
+export type AiChatMutationError = ErrorType<unknown>;
+
+/**
+ * @summary FAQ chat assistant about IT support and the AnyDesk tutorial
+ */
+export const useAiChat = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiChat>>,
+    TError,
+    { data: BodyType<AiChatBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof aiChat>>,
+  TError,
+  { data: BodyType<AiChatBody> },
+  TContext
+> => {
+  return useMutation(getAiChatMutationOptions(options));
 };
 
 /**

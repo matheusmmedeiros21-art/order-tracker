@@ -8,6 +8,8 @@ import {
   useUpdateTicket,
   useDeleteTicket,
   useGetTicketAiSummary,
+  useGetTicketAiSuggestedReply,
+  useAiGetInsights,
   TicketStatus,
   TicketCategory,
   TicketPriority,
@@ -20,7 +22,7 @@ import {
   Monitor, Printer, Network, FileCode, Phone, HelpCircle,
   Search, CheckCircle2, Clock, AlertTriangle, PlayCircle,
   MoreVertical, Trash2, FileText, ChevronDown, Check, Copy,
-  Image as ImageIcon, X, Sparkles, Loader2
+  Image as ImageIcon, X, Sparkles, Loader2, MessageSquare, RefreshCw, TrendingUp, AlertOctagon, Lightbulb, FileSearch
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -166,6 +168,9 @@ export function AdminDashboard() {
           <StatCard title="Concluídos" value={statsLoading ? null : stats?.done} icon={<CheckCircle2 className="w-4 h-4" />} accent="green" />
         </div>
 
+        <AiInsightsCard />
+
+
         {/* Tabs */}
         <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
           <div className="flex items-center gap-1 p-1 bg-[#f5f5f7] rounded-full w-full sm:w-fit">
@@ -293,20 +298,161 @@ function StatCard({
   );
 }
 
+function AiInsightsCard() {
+  const [open, setOpen] = useState(false);
+  const insights = useAiGetInsights({
+    query: {
+      queryKey: ["ai", "insights"],
+      enabled: open,
+      refetchOnWindowFocus: false,
+      staleTime: 60_000,
+    },
+  });
+
+  const kindIcons: Record<string, React.ReactNode> = {
+    trend: <TrendingUp className="w-4 h-4" />,
+    alert: <AlertOctagon className="w-4 h-4" />,
+    suggestion: <Lightbulb className="w-4 h-4" />,
+    summary: <FileSearch className="w-4 h-4" />,
+  };
+  const kindAccent: Record<string, string> = {
+    trend: "bg-[#0071E3]/10 text-[#0071E3]",
+    alert: "bg-red-500/10 text-red-700",
+    suggestion: "bg-amber-500/10 text-amber-800",
+    summary: "bg-violet-500/10 text-violet-700",
+  };
+
+  return (
+    <div className="rounded-[20px] border border-[#0071E3]/15 bg-gradient-to-br from-[#0071E3]/[0.04] via-violet-500/[0.03] to-emerald-500/[0.04] p-5">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0071E3] to-violet-500 flex items-center justify-center text-white shadow-sm">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-widest text-[#0071E3]">Insights por IA</p>
+            <p className="text-[13px] text-[#1d1d1f] font-medium">
+              {insights.data?.headline ?? "Análise dos chamados recentes"}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {open && (
+            <button
+              type="button"
+              onClick={() => insights.refetch()}
+              disabled={insights.isFetching}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/70 border border-black/[0.06] text-[12px] text-[#1d1d1f] hover:bg-white transition-colors disabled:opacity-60"
+            >
+              <RefreshCw className={`w-3 h-3 ${insights.isFetching ? "animate-spin" : ""}`} />
+              Atualizar
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0071E3] text-white hover:bg-[#0066cc] transition-colors text-[12px] font-medium"
+          >
+            <Sparkles className="w-3 h-3" />
+            {open ? "Esconder" : "Gerar insights"}
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-4 space-y-3">
+              {insights.isFetching && !insights.data && (
+                <div className="flex items-center gap-2 text-[13px] text-[#6e6e73] py-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Analisando chamados recentes…
+                </div>
+              )}
+              {insights.isError && (
+                <div className="text-[13px] text-red-700 py-2">
+                  Não consegui gerar insights agora.
+                </div>
+              )}
+              {insights.data?.items?.length === 0 && !insights.isFetching && (
+                <p className="text-[13px] text-[#6e6e73]">Nada relevante pra destacar agora.</p>
+              )}
+              {insights.data?.items?.map((it, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl bg-white/70 border border-black/[0.06] p-4 flex gap-3"
+                >
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${kindAccent[it.kind] ?? kindAccent.summary}`}>
+                    {kindIcons[it.kind] ?? kindIcons.summary}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-medium text-[#1d1d1f]">{it.title}</p>
+                    <p className="text-[13px] text-[#6e6e73] mt-0.5 leading-relaxed">{it.body}</p>
+                    {it.ticketIds && it.ticketIds.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {it.ticketIds.map((tid) => (
+                          <span
+                            key={tid}
+                            className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#f5f5f7] text-[#6e6e73] tabular-nums"
+                          >
+                            #{tid.toString().padStart(4, "0")}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {insights.data && (
+                <p className="text-[10px] text-[#86868b] pt-1">
+                  Gerado em {format(new Date(insights.data.generatedAt), "HH:mm")} · Pode conter erros, valide antes de agir.
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function TicketRow({ ticket, index }: { ticket: Ticket, index: number }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const updateTicket = useUpdateTicket();
   const deleteTicket = useDeleteTicket();
   const aiSummary = useGetTicketAiSummary();
+  const aiReply = useGetTicketAiSuggestedReply();
   const [showImage, setShowImage] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [replyCopied, setReplyCopied] = useState(false);
 
   const runAiSummary = () => {
     setAiOpen(true);
     if (!aiSummary.data || aiSummary.variables?.id !== ticket.id) {
       aiSummary.mutate({ id: ticket.id });
     }
+  };
+
+  const runAiReply = () => {
+    setReplyOpen(true);
+    if (!aiReply.data || aiReply.variables?.id !== ticket.id) {
+      aiReply.mutate({ id: ticket.id });
+    }
+  };
+
+  const copyReply = () => {
+    if (!aiReply.data) return;
+    navigator.clipboard.writeText(aiReply.data.reply).catch(() => {});
+    setReplyCopied(true);
+    setTimeout(() => setReplyCopied(false), 1500);
   };
 
   const aiSeverityLabel: Record<string, string> = {
@@ -418,46 +564,128 @@ function TicketRow({ ticket, index }: { ticket: Ticket, index: number }) {
                 </span>
                 {ticket.location && <span>· Local: {ticket.location}</span>}
               </div>
-              {(ticket.anydeskId || ticket.screenshotUrl) && (
-                <div className="flex flex-wrap items-center gap-2 mt-3">
-                  {ticket.anydeskId && (
-                    <button
-                      type="button"
-                      onClick={copyAnydesk}
-                      className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#0071E3]/[0.08] border border-[#0071E3]/20 text-[#0071E3] hover:bg-[#0071E3]/15 transition-colors text-[12px] font-mono tracking-wider"
-                      title="Copiar endereço AnyDesk"
-                    >
-                      <span className="uppercase tracking-widest text-[10px] font-sans not-italic text-[#0071E3]/70 font-medium">AnyDesk</span>
-                      {ticket.anydeskId}
-                      <Copy className="w-3 h-3 opacity-60" />
-                    </button>
-                  )}
-                  {ticket.screenshotUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setShowImage(true)}
-                      className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-700 hover:bg-violet-500/15 transition-colors text-[12px] font-medium"
-                    >
-                      <ImageIcon className="w-3 h-3" />
-                      Ver print
-                    </button>
-                  )}
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                {ticket.anydeskId && (
                   <button
                     type="button"
-                    onClick={runAiSummary}
-                    disabled={aiSummary.isPending}
-                    className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-[#0071E3]/10 to-violet-500/10 border border-[#0071E3]/25 text-[#0071E3] hover:from-[#0071E3]/15 hover:to-violet-500/15 transition-colors text-[12px] font-medium disabled:opacity-60"
-                    title="Resumir o problema com IA"
+                    onClick={copyAnydesk}
+                    className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#0071E3]/[0.08] border border-[#0071E3]/20 text-[#0071E3] hover:bg-[#0071E3]/15 transition-colors text-[12px] font-mono tracking-wider"
+                    title="Copiar endereço AnyDesk"
                   >
-                    {aiSummary.isPending && aiSummary.variables?.id === ticket.id ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-3 h-3" />
-                    )}
-                    Resumir com IA
+                    <span className="uppercase tracking-widest text-[10px] font-sans not-italic text-[#0071E3]/70 font-medium">AnyDesk</span>
+                    {ticket.anydeskId}
+                    <Copy className="w-3 h-3 opacity-60" />
                   </button>
-                </div>
-              )}
+                )}
+                {ticket.screenshotUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setShowImage(true)}
+                    className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-700 hover:bg-violet-500/15 transition-colors text-[12px] font-medium"
+                  >
+                    <ImageIcon className="w-3 h-3" />
+                    Ver print
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={runAiSummary}
+                  disabled={aiSummary.isPending}
+                  className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-[#0071E3]/10 to-violet-500/10 border border-[#0071E3]/25 text-[#0071E3] hover:from-[#0071E3]/15 hover:to-violet-500/15 transition-colors text-[12px] font-medium disabled:opacity-60"
+                  title="Resumir o problema com IA"
+                >
+                  {aiSummary.isPending && aiSummary.variables?.id === ticket.id ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3 h-3" />
+                  )}
+                  Resumir com IA
+                </button>
+                <button
+                  type="button"
+                  onClick={runAiReply}
+                  disabled={aiReply.isPending}
+                  className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 hover:bg-emerald-500/15 transition-colors text-[12px] font-medium disabled:opacity-60"
+                  title="Sugerir uma resposta pro usuário"
+                >
+                  {aiReply.isPending && aiReply.variables?.id === ticket.id ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <MessageSquare className="w-3 h-3" />
+                  )}
+                  Sugerir resposta
+                </button>
+              </div>
+
+              <AnimatePresence>
+                {replyOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden mt-3"
+                  >
+                    <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-widest text-emerald-700">
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          Resposta sugerida
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => aiReply.mutate({ id: ticket.id })}
+                            disabled={aiReply.isPending}
+                            className="text-emerald-700/70 hover:text-emerald-700 transition-colors disabled:opacity-50"
+                            title="Gerar outra"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${aiReply.isPending ? "animate-spin" : ""}`} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setReplyOpen(false)}
+                            className="text-[#86868b] hover:text-[#1d1d1f] transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {aiReply.isPending && (
+                        <div className="flex items-center gap-2 text-[13px] text-[#6e6e73] py-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Escrevendo resposta…
+                        </div>
+                      )}
+
+                      {aiReply.isError && (
+                        <div className="text-[13px] text-red-700 py-2">
+                          Não consegui gerar agora. Tenta de novo.
+                        </div>
+                      )}
+
+                      {aiReply.data && aiReply.variables?.id === ticket.id && !aiReply.isPending && (
+                        <>
+                          <p className="text-[13px] text-[#1d1d1f] leading-relaxed whitespace-pre-wrap">
+                            {aiReply.data.reply}
+                          </p>
+                          <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-emerald-500/10">
+                            <button
+                              type="button"
+                              onClick={copyReply}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 hover:bg-emerald-500/20 transition-colors text-[12px] font-medium"
+                            >
+                              {replyCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                              {replyCopied ? "Copiado" : "Copiar resposta"}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <AnimatePresence>
                 {aiOpen && (

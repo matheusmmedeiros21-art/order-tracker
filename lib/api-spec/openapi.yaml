@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: tickets
     description: Support ticket operations
+  - name: ai
+    description: AI-powered features
 paths:
   /healthz:
     get:
@@ -143,6 +145,116 @@ paths:
                 $ref: "#/components/schemas/TicketAiSummary"
         "404":
           description: Ticket not found
+
+  /tickets/{id}/ai-suggest-reply:
+    post:
+      operationId: getTicketAiSuggestedReply
+      tags: [ai]
+      summary: Suggest a reply to the ticket requester
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Suggested reply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSuggestedReply"
+        "404":
+          description: Ticket not found
+
+  /ai/classify:
+    post:
+      operationId: aiClassifyTicket
+      tags: [ai]
+      summary: Auto-classify a ticket from its description (and optional screenshot)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiClassifyBody"
+      responses:
+        "200":
+          description: Classification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiClassifyResult"
+
+  /ai/improve-description:
+    post:
+      operationId: aiImproveDescription
+      tags: [ai]
+      summary: Rewrite the user's description in clearer technical language
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiImproveBody"
+      responses:
+        "200":
+          description: Improved description
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiImproveResult"
+
+  /ai/find-duplicates:
+    post:
+      operationId: aiFindDuplicates
+      tags: [ai]
+      summary: Find existing open tickets that look like the proposed new one
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiFindDuplicatesBody"
+      responses:
+        "200":
+          description: Matches
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiFindDuplicatesResult"
+
+  /ai/insights:
+    get:
+      operationId: aiGetInsights
+      tags: [ai]
+      summary: AI-generated dashboard insights for the admin
+      responses:
+        "200":
+          description: Insights
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiInsights"
+
+  /ai/chat:
+    post:
+      operationId: aiChat
+      tags: [ai]
+      summary: FAQ chat assistant about IT support and the AnyDesk tutorial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiChatBody"
+      responses:
+        "200":
+          description: Reply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiChatResult"
 
   /tickets/{id}:
     get:
@@ -426,6 +538,173 @@ components:
         - suggestedActions
         - severity
         - hasScreenshot
+
+    AiClassifyBody:
+      type: object
+      properties:
+        description:
+          type: string
+        screenshotUrl:
+          type: string
+          nullable: true
+      required:
+        - description
+
+    AiClassifyResult:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [computer, printer, network, software, phone, other]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        suggestedTitle:
+          type: string
+        reasoning:
+          type: string
+      required:
+        - category
+        - priority
+        - suggestedTitle
+        - reasoning
+
+    AiImproveBody:
+      type: object
+      properties:
+        text:
+          type: string
+      required:
+        - text
+
+    AiImproveResult:
+      type: object
+      properties:
+        improved:
+          type: string
+      required:
+        - improved
+
+    AiFindDuplicatesBody:
+      type: object
+      properties:
+        description:
+          type: string
+        category:
+          type: string
+          nullable: true
+      required:
+        - description
+
+    AiDuplicateMatch:
+      type: object
+      properties:
+        ticketId:
+          type: integer
+        requesterName:
+          type: string
+        descriptionExcerpt:
+          type: string
+        status:
+          type: string
+        score:
+          type: number
+        reason:
+          type: string
+      required:
+        - ticketId
+        - requesterName
+        - descriptionExcerpt
+        - status
+        - score
+        - reason
+
+    AiFindDuplicatesResult:
+      type: object
+      properties:
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/AiDuplicateMatch"
+      required:
+        - matches
+
+    AiSuggestedReply:
+      type: object
+      properties:
+        ticketId:
+          type: integer
+        reply:
+          type: string
+      required:
+        - ticketId
+        - reply
+
+    AiInsightItem:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum: [trend, alert, suggestion, summary]
+        title:
+          type: string
+        body:
+          type: string
+        ticketIds:
+          type: array
+          items:
+            type: integer
+      required:
+        - kind
+        - title
+        - body
+
+    AiInsights:
+      type: object
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        headline:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AiInsightItem"
+      required:
+        - generatedAt
+        - headline
+        - items
+
+    AiChatMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+      required:
+        - role
+        - content
+
+    AiChatBody:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/AiChatMessage"
+      required:
+        - messages
+
+    AiChatResult:
+      type: object
+      properties:
+        reply:
+          type: string
+      required:
+        - reply
 
     TicketStats:
       type: object

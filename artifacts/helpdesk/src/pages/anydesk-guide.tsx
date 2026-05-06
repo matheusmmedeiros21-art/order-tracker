@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { motion, useInView } from "framer-motion";
 import { Download, Monitor, ArrowRight, ArrowLeft, Apple, Check, Copy } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AiChatWidget } from "@/components/ai-chat-widget";
 
 function GlassNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -241,6 +242,8 @@ export function AnydeskGuide() {
           <div>{new Date().getFullYear()}</div>
         </div>
       </footer>
+
+      <AiChatWidget />
     </div>
   );
 }

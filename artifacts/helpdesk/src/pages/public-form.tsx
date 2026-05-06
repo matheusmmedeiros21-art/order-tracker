@@ -5,7 +5,15 @@ import * as z from "zod";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreateTicketBodyCategory, CreateTicketBodyPriority } from "@workspace/api-client-react";
-import { useCreateTicket, useGetTicketQueuePosition, getGetTicketQueuePositionQueryKey } from "@workspace/api-client-react";
+import {
+  useCreateTicket,
+  useGetTicketQueuePosition,
+  getGetTicketQueuePositionQueryKey,
+  useAiClassifyTicket,
+  useAiImproveDescription,
+  useAiFindDuplicates,
+  type AiDuplicateMatch,
+} from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -16,7 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Monitor, Printer, Network, FileCode, Phone, HelpCircle,
   AlertCircle, ArrowRight, CheckCircle2, ArrowLeft,
-  HelpingHand, ImagePlus, X, Bell, BellOff, Users, Sparkles
+  HelpingHand, ImagePlus, X, Bell, BellOff, Users, Sparkles,
+  Wand2, Loader2, AlertTriangle
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -100,6 +109,13 @@ export function PublicForm() {
   const [imageProcessing, setImageProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createTicketMutation = useCreateTicket();
+  const classifyMutation = useAiClassifyTicket();
+  const improveMutation = useAiImproveDescription();
+  const findDuplicatesMutation = useAiFindDuplicates();
+  const [duplicates, setDuplicates] = useState<AiDuplicateMatch[]>([]);
+  const [dismissedDuplicates, setDismissedDuplicates] = useState(false);
+  const dupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dupReqIdRef = useRef(0);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -139,6 +155,76 @@ export function PublicForm() {
     setScreenshot(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
+
+  function runImprove() {
+    const text = form.getValues("description").trim();
+    if (text.length < 5) {
+      toast({ title: "Escreve um pouco mais antes", description: "Digita pelo menos uma frase." });
+      return;
+    }
+    improveMutation.mutate(
+      { data: { text } },
+      {
+        onSuccess: (r) => {
+          form.setValue("description", r.improved, { shouldValidate: true, shouldDirty: true });
+          toast({ title: "Texto melhorado", description: "Revisa antes de enviar." });
+        },
+        onError: () => toast({ title: "Não consegui melhorar agora", variant: "destructive" }),
+      },
+    );
+  }
+
+  function runClassify() {
+    const description = form.getValues("description").trim();
+    if (description.length < 5) {
+      toast({ title: "Escreve a descrição primeiro", description: "Preciso de uma frase pra classificar." });
+      return;
+    }
+    classifyMutation.mutate(
+      { data: { description, screenshotUrl: screenshot } },
+      {
+        onSuccess: (r) => {
+          form.setValue("category", r.category as CreateTicketBodyCategory, { shouldDirty: true });
+          form.setValue("priority", r.priority as CreateTicketBodyPriority, { shouldDirty: true });
+          toast({
+            title: "Categoria e prioridade preenchidas",
+            description: r.reasoning || "Revisa se está correto.",
+          });
+        },
+        onError: () => toast({ title: "Não consegui classificar", variant: "destructive" }),
+      },
+    );
+  }
+
+  const description = form.watch("description");
+  const category = form.watch("category");
+
+  useEffect(() => {
+    if (dismissedDuplicates) return;
+    if (!description || description.trim().length < 30) {
+      setDuplicates([]);
+      return;
+    }
+    if (dupTimerRef.current) clearTimeout(dupTimerRef.current);
+    dupTimerRef.current = setTimeout(() => {
+      const myReq = ++dupReqIdRef.current;
+      findDuplicatesMutation.mutate(
+        { data: { description: description.trim(), category } },
+        {
+          onSuccess: (r) => {
+            if (myReq === dupReqIdRef.current) setDuplicates(r.matches);
+          },
+          onError: () => {
+            if (myReq === dupReqIdRef.current) setDuplicates([]);
+          },
+        },
+      );
+    }, 900);
+    return () => {
+      if (dupTimerRef.current) clearTimeout(dupTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [description, category, dismissedDuplicates]);
 
   function onSubmit(data: FormValues) {
     createTicketMutation.mutate(
@@ -383,10 +469,92 @@ export function PublicForm() {
                                 {...field}
                               />
                             </FormControl>
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={runImprove}
+                                disabled={improveMutation.isPending}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0071E3]/[0.08] border border-[#0071E3]/20 text-[#0071E3] hover:bg-[#0071E3]/15 transition-colors text-[12px] font-medium disabled:opacity-60"
+                              >
+                                {improveMutation.isPending ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Wand2 className="w-3 h-3" />
+                                )}
+                                Melhorar texto com IA
+                              </button>
+                              <button
+                                type="button"
+                                onClick={runClassify}
+                                disabled={classifyMutation.isPending}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-700 hover:bg-violet-500/15 transition-colors text-[12px] font-medium disabled:opacity-60"
+                              >
+                                {classifyMutation.isPending ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Sparkles className="w-3 h-3" />
+                                )}
+                                Auto-preencher categoria e prioridade
+                              </button>
+                            </div>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+
+                      <AnimatePresence>
+                        {duplicates.length > 0 && !dismissedDuplicates && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4 space-y-3"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 text-[13px] font-medium text-amber-800">
+                                <AlertTriangle className="w-4 h-4" />
+                                Já existe chamado parecido em aberto
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setDismissedDuplicates(true)}
+                                className="text-amber-700/60 hover:text-amber-800"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <p className="text-[12px] text-amber-800/80">
+                              Confere se é o seu antes de abrir mais um:
+                            </p>
+                            <div className="space-y-2">
+                              {duplicates.map((d) => (
+                                <Link
+                                  key={d.ticketId}
+                                  href="/fila"
+                                  onClick={() => {
+                                    try { window.localStorage.setItem("helpdesk_my_ticket", String(d.ticketId)); } catch {}
+                                  }}
+                                  className="block rounded-xl bg-white/70 border border-amber-500/20 p-3 hover:bg-white transition-colors"
+                                >
+                                  <div className="flex items-center justify-between text-[12px] font-mono text-[#86868b]">
+                                    <span>#{d.ticketId.toString().padStart(4, "0")} · {d.requesterName}</span>
+                                    <span className="text-amber-700">{Math.round(d.score * 100)}% parecido</span>
+                                  </div>
+                                  <p className="text-[13px] text-[#1d1d1f] mt-1 line-clamp-2">{d.descriptionExcerpt}</p>
+                                  <p className="text-[11px] text-amber-700/80 mt-1 italic">{d.reason}</p>
+                                </Link>
+                              ))}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setDismissedDuplicates(true)}
+                              className="text-[12px] text-amber-700 hover:underline"
+                            >
+                              Não é o meu, continuar abrindo
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
                       <div className="space-y-2">
                         <label className="text-sm font-medium leading-none text-[#1d1d1f]">Print do erro (opcional)</label>

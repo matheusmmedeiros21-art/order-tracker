@@ -217,6 +217,115 @@ export interface TicketAiSummary {
   hasScreenshot: boolean;
 }
 
+export interface AiClassifyBody {
+  description: string;
+  screenshotUrl?: string | null;
+}
+
+export type AiClassifyResultCategory =
+  (typeof AiClassifyResultCategory)[keyof typeof AiClassifyResultCategory];
+
+export const AiClassifyResultCategory = {
+  computer: "computer",
+  printer: "printer",
+  network: "network",
+  software: "software",
+  phone: "phone",
+  other: "other",
+} as const;
+
+export type AiClassifyResultPriority =
+  (typeof AiClassifyResultPriority)[keyof typeof AiClassifyResultPriority];
+
+export const AiClassifyResultPriority = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  urgent: "urgent",
+} as const;
+
+export interface AiClassifyResult {
+  category: AiClassifyResultCategory;
+  priority: AiClassifyResultPriority;
+  suggestedTitle: string;
+  reasoning: string;
+}
+
+export interface AiImproveBody {
+  text: string;
+}
+
+export interface AiImproveResult {
+  improved: string;
+}
+
+export interface AiFindDuplicatesBody {
+  description: string;
+  category?: string | null;
+}
+
+export interface AiDuplicateMatch {
+  ticketId: number;
+  requesterName: string;
+  descriptionExcerpt: string;
+  status: string;
+  score: number;
+  reason: string;
+}
+
+export interface AiFindDuplicatesResult {
+  matches: AiDuplicateMatch[];
+}
+
+export interface AiSuggestedReply {
+  ticketId: number;
+  reply: string;
+}
+
+export type AiInsightItemKind =
+  (typeof AiInsightItemKind)[keyof typeof AiInsightItemKind];
+
+export const AiInsightItemKind = {
+  trend: "trend",
+  alert: "alert",
+  suggestion: "suggestion",
+  summary: "summary",
+} as const;
+
+export interface AiInsightItem {
+  kind: AiInsightItemKind;
+  title: string;
+  body: string;
+  ticketIds?: number[];
+}
+
+export interface AiInsights {
+  generatedAt: string;
+  headline: string;
+  items: AiInsightItem[];
+}
+
+export type AiChatMessageRole =
+  (typeof AiChatMessageRole)[keyof typeof AiChatMessageRole];
+
+export const AiChatMessageRole = {
+  user: "user",
+  assistant: "assistant",
+} as const;
+
+export interface AiChatMessage {
+  role: AiChatMessageRole;
+  content: string;
+}
+
+export interface AiChatBody {
+  messages: AiChatMessage[];
+}
+
+export interface AiChatResult {
+  reply: string;
+}
+
 export type TicketStatsByCategoryItem = {
   category: string;
   count: number;
