@@ -122,6 +122,28 @@ paths:
         "404":
           description: Ticket not found
 
+  /tickets/{id}/ai-summary:
+    post:
+      operationId: getTicketAiSummary
+      tags: [tickets]
+      summary: Generate an AI summary of the ticket and screenshot
+      description: Uses GPT vision to analyze the screenshot + description and produce a short admin-friendly diagnosis.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketAiSummary"
+        "404":
+          description: Ticket not found
+
   /tickets/{id}:
     get:
       operationId: getTicket
@@ -378,6 +400,32 @@ components:
         - totalAhead
         - totalActive
         - status
+
+    TicketAiSummary:
+      type: object
+      properties:
+        ticketId:
+          type: integer
+        summary:
+          type: string
+        diagnosis:
+          type: string
+        suggestedActions:
+          type: array
+          items:
+            type: string
+        severity:
+          type: string
+          enum: [low, medium, high, urgent]
+        hasScreenshot:
+          type: boolean
+      required:
+        - ticketId
+        - summary
+        - diagnosis
+        - suggestedActions
+        - severity
+        - hasScreenshot
 
     TicketStats:
       type: object

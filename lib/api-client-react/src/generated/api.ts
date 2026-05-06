@@ -22,6 +22,7 @@ import type {
   ListTicketsParams,
   PublicQueue,
   Ticket,
+  TicketAiSummary,
   TicketQueuePosition,
   TicketStats,
   UpdateTicketBody,
@@ -533,6 +534,91 @@ export function useGetTicketQueuePosition<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Uses GPT vision to analyze the screenshot + description and produce a short admin-friendly diagnosis.
+ * @summary Generate an AI summary of the ticket and screenshot
+ */
+export const getGetTicketAiSummaryUrl = (id: number) => {
+  return `/api/tickets/${id}/ai-summary`;
+};
+
+export const getTicketAiSummary = async (
+  id: number,
+  options?: RequestInit,
+): Promise<TicketAiSummary> => {
+  return customFetch<TicketAiSummary>(getGetTicketAiSummaryUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getGetTicketAiSummaryMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getTicketAiSummary>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof getTicketAiSummary>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["getTicketAiSummary"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof getTicketAiSummary>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return getTicketAiSummary(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GetTicketAiSummaryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof getTicketAiSummary>>
+>;
+
+export type GetTicketAiSummaryMutationError = ErrorType<void>;
+
+/**
+ * @summary Generate an AI summary of the ticket and screenshot
+ */
+export const useGetTicketAiSummary = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getTicketAiSummary>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof getTicketAiSummary>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getGetTicketAiSummaryMutationOptions(options));
+};
 
 /**
  * @summary Get a single ticket

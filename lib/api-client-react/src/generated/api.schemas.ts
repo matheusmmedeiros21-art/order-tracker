@@ -198,6 +198,25 @@ export interface TicketQueuePosition {
   status: TicketQueuePositionStatus;
 }
 
+export type TicketAiSummarySeverity =
+  (typeof TicketAiSummarySeverity)[keyof typeof TicketAiSummarySeverity];
+
+export const TicketAiSummarySeverity = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  urgent: "urgent",
+} as const;
+
+export interface TicketAiSummary {
+  ticketId: number;
+  summary: string;
+  diagnosis: string;
+  suggestedActions: string[];
+  severity: TicketAiSummarySeverity;
+  hasScreenshot: boolean;
+}
+
 export type TicketStatsByCategoryItem = {
   category: string;
   count: number;

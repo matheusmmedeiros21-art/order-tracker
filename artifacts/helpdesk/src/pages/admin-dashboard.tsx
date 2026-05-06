@@ -7,6 +7,7 @@ import {
   useGetTicketStats,
   useUpdateTicket,
   useDeleteTicket,
+  useGetTicketAiSummary,
   TicketStatus,
   TicketCategory,
   TicketPriority,
@@ -19,7 +20,7 @@ import {
   Monitor, Printer, Network, FileCode, Phone, HelpCircle,
   Search, CheckCircle2, Clock, AlertTriangle, PlayCircle,
   MoreVertical, Trash2, FileText, ChevronDown, Check, Copy,
-  Image as ImageIcon, X
+  Image as ImageIcon, X, Sparkles, Loader2
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -297,7 +298,29 @@ function TicketRow({ ticket, index }: { ticket: Ticket, index: number }) {
   const { toast } = useToast();
   const updateTicket = useUpdateTicket();
   const deleteTicket = useDeleteTicket();
+  const aiSummary = useGetTicketAiSummary();
   const [showImage, setShowImage] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+
+  const runAiSummary = () => {
+    setAiOpen(true);
+    if (!aiSummary.data || aiSummary.variables?.id !== ticket.id) {
+      aiSummary.mutate({ id: ticket.id });
+    }
+  };
+
+  const aiSeverityLabel: Record<string, string> = {
+    low: "Baixa",
+    medium: "Média",
+    high: "Alta",
+    urgent: "Urgente",
+  };
+  const aiSeverityChip: Record<string, string> = {
+    urgent: "bg-red-500/10 text-red-700 border-red-500/20",
+    high: "bg-orange-500/10 text-orange-700 border-orange-500/20",
+    medium: "bg-amber-500/10 text-amber-700 border-amber-500/20",
+    low: "bg-[#f5f5f7] text-[#6e6e73] border-black/[0.06]",
+  };
 
   const copyAnydesk = () => {
     if (!ticket.anydeskId) return;
@@ -419,8 +442,103 @@ function TicketRow({ ticket, index }: { ticket: Ticket, index: number }) {
                       Ver print
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={runAiSummary}
+                    disabled={aiSummary.isPending}
+                    className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-[#0071E3]/10 to-violet-500/10 border border-[#0071E3]/25 text-[#0071E3] hover:from-[#0071E3]/15 hover:to-violet-500/15 transition-colors text-[12px] font-medium disabled:opacity-60"
+                    title="Resumir o problema com IA"
+                  >
+                    {aiSummary.isPending && aiSummary.variables?.id === ticket.id ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-3 h-3" />
+                    )}
+                    Resumir com IA
+                  </button>
                 </div>
               )}
+
+              <AnimatePresence>
+                {aiOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden mt-3"
+                  >
+                    <div className="rounded-2xl border border-[#0071E3]/15 bg-gradient-to-br from-[#0071E3]/[0.04] to-violet-500/[0.04] p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-widest text-[#0071E3]">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Análise por IA
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setAiOpen(false)}
+                          className="text-[#86868b] hover:text-[#1d1d1f] transition-colors"
+                          title="Fechar"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {aiSummary.isPending && (
+                        <div className="flex items-center gap-2 text-[13px] text-[#6e6e73] py-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Analisando descrição{ticket.screenshotUrl ? " e imagem" : ""}…
+                        </div>
+                      )}
+
+                      {aiSummary.isError && (
+                        <div className="text-[13px] text-red-700 py-2">
+                          Não consegui gerar o resumo agora. Tenta de novo em alguns segundos.
+                        </div>
+                      )}
+
+                      {aiSummary.data && aiSummary.variables?.id === ticket.id && !aiSummary.isPending && (
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-2 flex-wrap">
+                            <p className="text-[14px] font-medium text-[#1d1d1f] flex-1 min-w-[200px]">
+                              {aiSummary.data.summary}
+                            </p>
+                            <span className={`text-[11px] px-2 py-0.5 rounded-full border font-medium shrink-0 ${aiSeverityChip[aiSummary.data.severity] ?? aiSeverityChip.medium}`}>
+                              IA: {aiSeverityLabel[aiSummary.data.severity] ?? aiSummary.data.severity}
+                            </span>
+                          </div>
+
+                          {aiSummary.data.diagnosis && (
+                            <p className="text-[13px] text-[#3a3a3c] leading-relaxed">
+                              {aiSummary.data.diagnosis}
+                            </p>
+                          )}
+
+                          {aiSummary.data.suggestedActions.length > 0 && (
+                            <div>
+                              <p className="text-[11px] font-medium uppercase tracking-widest text-[#86868b] mb-1.5">
+                                Ações sugeridas
+                              </p>
+                              <ul className="space-y-1">
+                                {aiSummary.data.suggestedActions.map((action, i) => (
+                                  <li key={i} className="flex items-start gap-2 text-[13px] text-[#1d1d1f]">
+                                    <span className="text-[#0071E3] mt-0.5">›</span>
+                                    <span>{action}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          <p className="text-[10px] text-[#86868b] pt-1 border-t border-black/[0.04]">
+                            Gerado por GPT — pode conter erros. Verifique antes de agir.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <AnimatePresence>

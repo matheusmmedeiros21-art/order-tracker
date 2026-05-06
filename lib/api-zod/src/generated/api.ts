@@ -197,6 +197,23 @@ export const GetTicketQueuePositionResponse = zod
   );
 
 /**
+ * Uses GPT vision to analyze the screenshot + description and produce a short admin-friendly diagnosis.
+ * @summary Generate an AI summary of the ticket and screenshot
+ */
+export const GetTicketAiSummaryParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetTicketAiSummaryResponse = zod.object({
+  ticketId: zod.number(),
+  summary: zod.string(),
+  diagnosis: zod.string(),
+  suggestedActions: zod.array(zod.string()),
+  severity: zod.enum(["low", "medium", "high", "urgent"]),
+  hasScreenshot: zod.boolean(),
+});
+
+/**
  * @summary Get a single ticket
  */
 export const GetTicketParams = zod.object({

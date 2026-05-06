@@ -17,6 +17,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - Admin lista chamados por chegada ou prioridade (urgent>high>medium>low, desempate por createdAt asc); badge AnyDesk copiável e modal do print.
 - Tela pós-envio mostra `#ID` grande, posição na fila com polling 6s (`GET /tickets/:id/queue-position`) e dispara `Notification` quando status passa de `pending` → `in_progress`.
 - **Fila pública é puro FIFO** (createdAt asc, desempate por id). Prioridade existe só para o admin: não vai nas respostas de `/tickets/queue` nem `/tickets/:id/queue-position`, e não afeta a posição.
+- **IA no admin**: botão "Resumir com IA" em cada ticket (`/admin`) chama `POST /tickets/:id/ai-summary` (rota em `artifacts/api-server/src/routes/ai-summary.ts`) que usa OpenAI `gpt-5.4` via Replit AI Integrations (`AI_INTEGRATIONS_OPENAI_BASE_URL`/`_API_KEY`, sem chave do user, créditos do plano). Manda descrição + screenshot (vision quando há print) e devolve JSON `{summary, diagnosis, suggestedActions[], severity, hasScreenshot}`. UI mostra card glass inline com badge de severity da IA (rótulo "IA: …" pra não confundir com priority do ticket). `gpt-5.4` exige `max_completion_tokens` (não `max_tokens`) e `temperature` default.
 
 ## Stack
 
