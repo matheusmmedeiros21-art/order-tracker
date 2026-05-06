@@ -368,8 +368,8 @@ function TicketFlowSection() {
       </section>
 
       {/* Desktop cinematic scene */}
-      <section ref={containerRef} className="relative hidden md:block" style={{ height: "200vh" }}>
-        <div className="sticky top-[15vh] h-[70vh] w-full overflow-hidden flex items-center">
+      <section ref={containerRef} className="relative hidden md:block" style={{ height: "240vh" }}>
+        <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
         {/* Soft ambient gradient that strengthens toward the end */}
         <ResolveGlow progress={scrollYProgress} />
 
@@ -681,7 +681,7 @@ function WordsShowcase() {
   return (
     <section
       ref={containerRef}
-      className="relative py-32 md:py-44 md:-mt-[40vh] z-10"
+      className="relative py-32 md:py-44 md:-mt-[80vh] z-10 bg-gradient-to-b from-transparent via-white/80 to-white dark:via-black/60 dark:to-black"
     >
       <div className="w-full flex items-center justify-center pointer-events-none">
         <motion.div
