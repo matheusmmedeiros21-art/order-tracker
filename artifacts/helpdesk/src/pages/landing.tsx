@@ -657,10 +657,12 @@ function WordsShowcase() {
     offset: ["start end", "end start"],
   });
 
-  const y       = useTransform(scrollYProgress, [0, 1], ["0vh", "40vh"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.75, 1], [0, 0.85, 0.85, 0]);
-  const scale   = useTransform(scrollYProgress, [0, 1], [0.96, 1.02]);
-  const blur    = useTransform(scrollYProgress, [0, 0.2, 0.75, 1], [4, 0, 0, 4]);
+  // Phrase drifts down across the entire section, following the scroll
+  // from where the previous animation ends until the next block begins.
+  const y       = useTransform(scrollYProgress, [0, 1], ["0vh", "75vh"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0, 0.9, 0.9, 0]);
+  const scale   = useTransform(scrollYProgress, [0, 1], [0.95, 1.05]);
+  const blur    = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [6, 0, 0, 6]);
   const filter  = useTransform(blur, (b) => `blur(${b}px)`);
 
   if (reduceMotion) {
@@ -675,11 +677,11 @@ function WordsShowcase() {
   }
 
   return (
-    <section ref={containerRef} className="relative" style={{ height: "120vh" }}>
+    <section ref={containerRef} className="relative" style={{ height: "220vh" }}>
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
           style={{ y, opacity, scale, filter }}
-          className="absolute top-[20vh] inset-x-0 text-center px-6 will-change-transform"
+          className="absolute top-[15vh] inset-x-0 text-center px-6 will-change-transform"
         >
           <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3 md:mb-4">
             Transparente
