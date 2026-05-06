@@ -175,7 +175,7 @@ function CinematicShowcase() {
     <section
       ref={containerRef}
       className="relative"
-      style={{ height: "180vh" }}
+      style={{ height: "150vh" }}
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         {/* Parallax background blobs */}
@@ -345,12 +345,26 @@ function WordsShowcase() {
   return (
     <section ref={containerRef} className="relative" style={{ height: "260vh" }}>
       <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
-        <div className="relative w-full max-w-4xl px-6" style={{ perspective: 1200 }}>
+        <div className="relative w-full max-w-4xl px-6 h-[60vh]" style={{ perspective: 1200 }}>
           {phrases.map((p, i) => {
-            const start = i / phrases.length;
-            const peak = start + 1 / phrases.length / 2;
-            const end = (i + 1) / phrases.length;
-            return <Phrase key={i} kicker={p.kicker} text={p.text} progress={scrollYProgress} start={start} peak={peak} end={end} />;
+            // Each phrase owns a 1/N slot with a stable plateau in the middle.
+            const slot = 1 / phrases.length;
+            const start = i * slot;
+            const end = (i + 1) * slot;
+            const enter = start + slot * 0.18;   // fade-in done
+            const exit  = end   - slot * 0.18;   // fade-out start
+            return (
+              <Phrase
+                key={i}
+                kicker={p.kicker}
+                text={p.text}
+                progress={scrollYProgress}
+                start={start}
+                enter={enter}
+                exit={exit}
+                end={end}
+              />
+            );
           })}
         </div>
       </div>
@@ -363,23 +377,25 @@ function Phrase({
   text,
   progress,
   start,
-  peak,
+  enter,
+  exit,
   end,
 }: {
   kicker: string;
   text: string;
   progress: import("framer-motion").MotionValue<number>;
   start: number;
-  peak: number;
+  enter: number;
+  exit: number;
   end: number;
 }) {
-  // Each phrase: fade-in + scale-up + Z-translate during its slot
-  const opacity = useTransform(progress, [start, peak, end], [0, 1, 0]);
-  const scale = useTransform(progress, [start, peak, end], [0.92, 1, 1.04]);
-  const y = useTransform(progress, [start, peak, end], [40, 0, -30]);
-  const rotateX = useTransform(progress, [start, peak, end], [8, 0, -6]);
-  const blur = useTransform(progress, [start, peak, end], [8, 0, 6]);
-  const filter = useTransform(blur, (b) => `blur(${b}px)`);
+  // Plateau ranges: fade-in 0→1 in [start..enter], hold at 1 [enter..exit], fade-out 1→0 in [exit..end]
+  const opacity = useTransform(progress, [start, enter, exit, end], [0, 1, 1, 0]);
+  const scale   = useTransform(progress, [start, enter, exit, end], [0.94, 1, 1, 1.03]);
+  const y       = useTransform(progress, [start, enter, exit, end], [30, 0, 0, -20]);
+  const rotateX = useTransform(progress, [start, enter, exit, end], [6, 0, 0, -4]);
+  const blur    = useTransform(progress, [start, enter, exit, end], [6, 0, 0, 4]);
+  const filter  = useTransform(blur, (b) => `blur(${b}px)`);
 
   return (
     <motion.div
