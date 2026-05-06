@@ -323,9 +323,11 @@ function MockRow({ position, name, cat, highlight, mine }: { position: string; n
 function TicketFlowSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
+  // Map progress 0→1 to the actual pinned scroll window so there is
+  // no dead space before/after the animation.
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start end", "end start"],
+    offset: ["start start", "end end"],
   });
 
   // Headline drift: subtle parallax over the whole sticky scene
@@ -366,7 +368,7 @@ function TicketFlowSection() {
       </section>
 
       {/* Desktop cinematic scene */}
-      <section ref={containerRef} className="relative hidden md:block" style={{ height: "320vh" }}>
+      <section ref={containerRef} className="relative hidden md:block" style={{ height: "260vh" }}>
         <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
         {/* Soft ambient gradient that strengthens toward the end */}
         <ResolveGlow progress={scrollYProgress} />
@@ -657,14 +659,13 @@ function WordsShowcase() {
     offset: ["start end", "end start"],
   });
 
-  // Sticky window for a 200vh section with h-screen child:
-  //   pin engages around progress 0.33 and releases around 0.66.
-  // Fade ranges anchored to that window for a clean handoff with the
-  // previous (TicketFlow) and next blocks.
-  const y       = useTransform(scrollYProgress, [0.33, 0.66], ["-2vh", "4vh"]);
-  const opacity = useTransform(scrollYProgress, [0.22, 0.36, 0.64, 0.78], [0, 1, 1, 0]);
-  const scale   = useTransform(scrollYProgress, [0.33, 0.66], [0.97, 1.03]);
-  const blur    = useTransform(scrollYProgress, [0.22, 0.36, 0.64, 0.78], [10, 0, 0, 10]);
+  // Phrase scrolls naturally with the page (no sticky pin).
+  // Fade in as it enters from below, fade out as it leaves above.
+  // A small parallax (slower than scroll) gives the Apple-like drift.
+  const y       = useTransform(scrollYProgress, [0, 1], ["10vh", "-10vh"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.25, 0.7, 1], [0, 1, 1, 0]);
+  const scale   = useTransform(scrollYProgress, [0, 1], [0.96, 1.04]);
+  const blur    = useTransform(scrollYProgress, [0, 0.25, 0.7, 1], [8, 0, 0, 8]);
   const filter  = useTransform(blur, (b) => `blur(${b}px)`);
 
   if (reduceMotion) {
@@ -679,9 +680,8 @@ function WordsShowcase() {
   }
 
   return (
-    <section ref={containerRef} className="relative" style={{ height: "200vh" }}>
-      {/* Sticky inner: pinned to viewport while the section scrolls past */}
-      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden pointer-events-none">
+    <section ref={containerRef} className="relative py-32 md:py-48 overflow-hidden">
+      <div className="w-full flex items-center justify-center pointer-events-none">
         <motion.div
           style={{ y, opacity, scale, filter }}
           className="text-center px-6 will-change-transform"
