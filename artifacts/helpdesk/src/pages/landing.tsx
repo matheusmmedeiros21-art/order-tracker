@@ -368,8 +368,8 @@ function TicketFlowSection() {
       </section>
 
       {/* Desktop cinematic scene */}
-      <section ref={containerRef} className="relative hidden md:block" style={{ height: "260vh" }}>
-        <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
+      <section ref={containerRef} className="relative hidden md:block" style={{ height: "200vh" }}>
+        <div className="sticky top-[15vh] h-[70vh] w-full overflow-hidden flex items-center">
         {/* Soft ambient gradient that strengthens toward the end */}
         <ResolveGlow progress={scrollYProgress} />
 
@@ -659,13 +659,12 @@ function WordsShowcase() {
     offset: ["start end", "end start"],
   });
 
-  // Phrase scrolls naturally with the page (no sticky pin).
-  // Fade in as it enters from below, fade out as it leaves above.
-  // A small parallax (slower than scroll) gives the Apple-like drift.
-  const y       = useTransform(scrollYProgress, [0, 1], ["10vh", "-10vh"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.25, 0.7, 1], [0, 1, 1, 0]);
-  const scale   = useTransform(scrollYProgress, [0, 1], [0.96, 1.04]);
-  const blur    = useTransform(scrollYProgress, [0, 0.25, 0.7, 1], [8, 0, 0, 8]);
+  // Phrase scrolls naturally with the page — NO Y transform so it
+  // moves at the exact same rate as the user's scroll.
+  // Only fades in/out and gently scales for an Apple-like reveal.
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  const scale   = useTransform(scrollYProgress, [0, 0.4, 0.6, 1], [0.95, 1, 1, 1.04]);
+  const blur    = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [10, 0, 0, 10]);
   const filter  = useTransform(blur, (b) => `blur(${b}px)`);
 
   if (reduceMotion) {
@@ -680,10 +679,13 @@ function WordsShowcase() {
   }
 
   return (
-    <section ref={containerRef} className="relative py-32 md:py-48 overflow-hidden">
+    <section
+      ref={containerRef}
+      className="relative py-32 md:py-44 md:-mt-[40vh] z-10"
+    >
       <div className="w-full flex items-center justify-center pointer-events-none">
         <motion.div
-          style={{ y, opacity, scale, filter }}
+          style={{ opacity, scale, filter }}
           className="text-center px-6 will-change-transform"
         >
           <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3 md:mb-4">
