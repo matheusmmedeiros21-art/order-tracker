@@ -309,9 +309,10 @@ function MockRow({ position, name, cat, highlight, mine }: { position: string; n
 }
 
 /**
- * WordsShowcase — Apple-style minimal text reveal.
- * 3 phrases reveal sequentially as you scroll (fade + scale + subtle 3D translate).
- * Light, clean, lots of whitespace.
+ * WordsShowcase — Two phrases that drift downward with the page scroll.
+ * Phrase 1 ("Abre. Descreve. Pronto.") lives in the top half (0 → 0.5).
+ * Phrase 2 ("Você vê a fila. Sempre.") lives in the bottom half (0.5 → 1).
+ * Translucent, fluid, no sticky pinning.
  */
 function WordsShowcase() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -321,94 +322,67 @@ function WordsShowcase() {
     offset: ["start end", "end start"],
   });
 
-  const phrases = [
-    { kicker: "Rápido", text: "Abre. Descreve. Pronto." },
-    { kicker: "Transparente", text: "Você vê a fila. Sempre." },
-    { kicker: "Sem fricção", text: "Sem ligar. Sem esperar." },
-  ];
+  // Phrase 1 — drifts from top to middle as page scrolls 0 → 0.5
+  const p1Y       = useTransform(scrollYProgress, [0, 0.5], ["0vh", "40vh"]);
+  const p1Opacity = useTransform(scrollYProgress, [0, 0.08, 0.42, 0.55], [0, 0.85, 0.85, 0]);
+  const p1Scale   = useTransform(scrollYProgress, [0, 0.5], [0.96, 1.02]);
+  const p1Blur    = useTransform(scrollYProgress, [0, 0.1, 0.45, 0.55], [4, 0, 0, 4]);
+  const p1Filter  = useTransform(p1Blur, (b) => `blur(${b}px)`);
+
+  // Phrase 2 — drifts from middle to bottom as page scrolls 0.5 → 1
+  const p2Y       = useTransform(scrollYProgress, [0.5, 1], ["0vh", "40vh"]);
+  const p2Opacity = useTransform(scrollYProgress, [0.45, 0.6, 0.92, 1], [0, 0.85, 0.85, 0]);
+  const p2Scale   = useTransform(scrollYProgress, [0.5, 1], [0.96, 1.02]);
+  const p2Blur    = useTransform(scrollYProgress, [0.45, 0.6, 0.9, 1], [4, 0, 0, 4]);
+  const p2Filter  = useTransform(p2Blur, (b) => `blur(${b}px)`);
 
   if (reduceMotion) {
     return (
-      <section className="py-32 px-6">
-        <div className="max-w-4xl mx-auto space-y-20 text-center">
-          {phrases.map((p, i) => (
-            <div key={i}>
-              <p className="text-[12px] font-medium uppercase tracking-[0.25em] text-[#0071E3] mb-3">{p.kicker}</p>
-              <h3 className="text-3xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]">{p.text}</h3>
-            </div>
-          ))}
+      <section className="py-32 px-6 space-y-32 text-center">
+        <div>
+          <p className="text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3">Rápido</p>
+          <h3 className="text-3xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]/80">Abre. Descreve. Pronto.</h3>
+        </div>
+        <div>
+          <p className="text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3">Transparente</p>
+          <h3 className="text-3xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]/80">Você vê a fila. Sempre.</h3>
         </div>
       </section>
     );
   }
 
   return (
-    <section ref={containerRef} className="relative" style={{ height: "260vh" }}>
-      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
-        <div className="relative w-full max-w-4xl px-6 h-[60vh]" style={{ perspective: 1200 }}>
-          {phrases.map((p, i) => {
-            // Each phrase owns a 1/N slot with a stable plateau in the middle.
-            const slot = 1 / phrases.length;
-            const start = i * slot;
-            const end = (i + 1) * slot;
-            const enter = start + slot * 0.18;   // fade-in done
-            const exit  = end   - slot * 0.18;   // fade-out start
-            return (
-              <Phrase
-                key={i}
-                kicker={p.kicker}
-                text={p.text}
-                progress={scrollYProgress}
-                start={start}
-                enter={enter}
-                exit={exit}
-                end={end}
-              />
-            );
-          })}
-        </div>
+    <section ref={containerRef} className="relative" style={{ height: "200vh" }}>
+      {/* Phrase 1 — top half */}
+      <div className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none">
+        <motion.div
+          style={{ y: p1Y, opacity: p1Opacity, scale: p1Scale, filter: p1Filter }}
+          className="absolute top-[20vh] inset-x-0 text-center px-6 will-change-transform"
+        >
+          <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3 md:mb-4">
+            Rápido
+          </p>
+          <h3 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold tracking-[-0.04em] text-[#1d1d1f] leading-[1.02]">
+            Abre. Descreve. Pronto.
+          </h3>
+        </motion.div>
+      </div>
+
+      {/* Phrase 2 — bottom half */}
+      <div className="absolute top-1/2 left-0 right-0 h-1/2 pointer-events-none">
+        <motion.div
+          style={{ y: p2Y, opacity: p2Opacity, scale: p2Scale, filter: p2Filter }}
+          className="absolute top-[15vh] inset-x-0 text-center px-6 will-change-transform"
+        >
+          <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3 md:mb-4">
+            Transparente
+          </p>
+          <h3 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold tracking-[-0.04em] text-[#1d1d1f] leading-[1.02]">
+            Você vê a fila. Sempre.
+          </h3>
+        </motion.div>
       </div>
     </section>
-  );
-}
-
-function Phrase({
-  kicker,
-  text,
-  progress,
-  start,
-  enter,
-  exit,
-  end,
-}: {
-  kicker: string;
-  text: string;
-  progress: import("framer-motion").MotionValue<number>;
-  start: number;
-  enter: number;
-  exit: number;
-  end: number;
-}) {
-  // Plateau ranges: fade-in 0→1 in [start..enter], hold at 1 [enter..exit], fade-out 1→0 in [exit..end]
-  const opacity = useTransform(progress, [start, enter, exit, end], [0, 1, 1, 0]);
-  const scale   = useTransform(progress, [start, enter, exit, end], [0.94, 1, 1, 1.03]);
-  const y       = useTransform(progress, [start, enter, exit, end], [30, 0, 0, -20]);
-  const rotateX = useTransform(progress, [start, enter, exit, end], [6, 0, 0, -4]);
-  const blur    = useTransform(progress, [start, enter, exit, end], [6, 0, 0, 4]);
-  const filter  = useTransform(blur, (b) => `blur(${b}px)`);
-
-  return (
-    <motion.div
-      style={{ opacity, scale, y, rotateX, filter, transformPerspective: 1200 }}
-      className="absolute inset-0 flex flex-col items-center justify-center text-center will-change-transform"
-    >
-      <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-4">
-        {kicker}
-      </p>
-      <h3 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold tracking-[-0.04em] text-[#1d1d1f] leading-[1.02]">
-        {text}
-      </h3>
-    </motion.div>
   );
 }
 
