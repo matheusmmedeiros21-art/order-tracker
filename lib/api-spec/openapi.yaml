@@ -181,6 +181,12 @@ components:
         location:
           type: string
           nullable: true
+        anydeskId:
+          type: string
+          nullable: true
+        screenshotUrl:
+          type: string
+          nullable: true
         adminNotes:
           type: string
           nullable: true
@@ -219,6 +225,12 @@ components:
         location:
           type: string
           nullable: true
+        anydeskId:
+          type: string
+          nullable: true
+        screenshotUrl:
+          type: string
+          nullable: true
       required:
         - requesterName
         - description
@@ -248,6 +260,12 @@ components:
           type: string
           enum: [computer, printer, network, software, phone, other]
         location:
+          type: string
+          nullable: true
+        anydeskId:
+          type: string
+          nullable: true
+        screenshotUrl:
           type: string
           nullable: true
 

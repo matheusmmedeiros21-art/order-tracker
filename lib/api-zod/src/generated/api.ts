@@ -40,6 +40,8 @@ export const ListTicketsResponseItem = zod.object({
   status: zod.enum(["pending", "in_progress", "done"]),
   priority: zod.enum(["low", "medium", "high", "urgent"]),
   location: zod.string().nullish(),
+  anydeskId: zod.string().nullish(),
+  screenshotUrl: zod.string().nullish(),
   adminNotes: zod.string().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -63,6 +65,8 @@ export const CreateTicketBody = zod.object({
   ]),
   priority: zod.enum(["low", "medium", "high", "urgent"]),
   location: zod.string().nullish(),
+  anydeskId: zod.string().nullish(),
+  screenshotUrl: zod.string().nullish(),
 });
 
 /**
@@ -103,6 +107,8 @@ export const GetTicketStatsResponse = zod.object({
       status: zod.enum(["pending", "in_progress", "done"]),
       priority: zod.enum(["low", "medium", "high", "urgent"]),
       location: zod.string().nullish(),
+      anydeskId: zod.string().nullish(),
+      screenshotUrl: zod.string().nullish(),
       adminNotes: zod.string().nullish(),
       createdAt: zod.coerce.date(),
       updatedAt: zod.coerce.date(),
@@ -133,6 +139,8 @@ export const GetTicketResponse = zod.object({
   status: zod.enum(["pending", "in_progress", "done"]),
   priority: zod.enum(["low", "medium", "high", "urgent"]),
   location: zod.string().nullish(),
+  anydeskId: zod.string().nullish(),
+  screenshotUrl: zod.string().nullish(),
   adminNotes: zod.string().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -156,6 +164,8 @@ export const UpdateTicketBody = zod.object({
     .enum(["computer", "printer", "network", "software", "phone", "other"])
     .optional(),
   location: zod.string().nullish(),
+  anydeskId: zod.string().nullish(),
+  screenshotUrl: zod.string().nullish(),
 });
 
 export const UpdateTicketResponse = zod.object({
@@ -174,6 +184,8 @@ export const UpdateTicketResponse = zod.object({
   status: zod.enum(["pending", "in_progress", "done"]),
   priority: zod.enum(["low", "medium", "high", "urgent"]),
   location: zod.string().nullish(),
+  anydeskId: zod.string().nullish(),
+  screenshotUrl: zod.string().nullish(),
   adminNotes: zod.string().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),

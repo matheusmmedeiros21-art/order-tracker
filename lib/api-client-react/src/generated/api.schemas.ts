@@ -48,6 +48,8 @@ export interface Ticket {
   status: TicketStatus;
   priority: TicketPriority;
   location?: string | null;
+  anydeskId?: string | null;
+  screenshotUrl?: string | null;
   adminNotes?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -82,6 +84,8 @@ export interface CreateTicketBody {
   category: CreateTicketBodyCategory;
   priority: CreateTicketBodyPriority;
   location?: string | null;
+  anydeskId?: string | null;
+  screenshotUrl?: string | null;
 }
 
 export type UpdateTicketBodyStatus =
@@ -124,6 +128,8 @@ export interface UpdateTicketBody {
   description?: string;
   category?: UpdateTicketBodyCategory;
   location?: string | null;
+  anydeskId?: string | null;
+  screenshotUrl?: string | null;
 }
 
 export type TicketStatsByCategoryItem = {

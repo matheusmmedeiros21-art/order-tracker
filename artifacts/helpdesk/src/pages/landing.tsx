@@ -45,9 +45,14 @@ export function Landing() {
       {/* Navigation Bar (Minimal) */}
       <nav className="fixed top-0 w-full z-50 mix-blend-difference px-6 py-6 md:px-12 flex justify-between items-center pointer-events-none">
         <div className="font-semibold text-lg tracking-tight">Central de Suporte TI</div>
-        <Link href="/admin" className="pointer-events-auto text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
-          Admin
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/anydesk" className="pointer-events-auto text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
+            AnyDesk
+          </Link>
+          <Link href="/admin" className="pointer-events-auto text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
+            Admin
+          </Link>
+        </div>
       </nav>
 
       {/* Section 1: Hero */}

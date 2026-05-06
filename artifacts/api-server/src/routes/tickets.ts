@@ -77,11 +77,28 @@ router.get("/tickets", async (req, res): Promise<void> => {
   res.json(tickets.map((t) => ListTicketsResponseItem.parse(t)));
 });
 
+const SCREENSHOT_DATA_URL_RE = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+const SCREENSHOT_MAX_LEN = 12 * 1024 * 1024;
+
+function validateScreenshot(value: string | null | undefined): { ok: true; value: string | null } | { ok: false; error: string } {
+  if (value === null || value === undefined || value === "") return { ok: true, value: null };
+  if (typeof value !== "string") return { ok: false, error: "screenshotUrl inválido" };
+  if (value.length > SCREENSHOT_MAX_LEN) return { ok: false, error: "Imagem muito grande" };
+  if (!SCREENSHOT_DATA_URL_RE.test(value)) return { ok: false, error: "screenshotUrl deve ser um data URL de imagem (jpeg, png ou webp)" };
+  return { ok: true, value };
+}
+
 router.post("/tickets", async (req, res): Promise<void> => {
   const parsed = CreateTicketBody.safeParse(req.body);
   if (!parsed.success) {
     req.log.warn({ errors: parsed.error.message }, "Invalid ticket body");
     res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const screenshot = validateScreenshot(parsed.data.screenshotUrl);
+  if (!screenshot.ok) {
+    res.status(400).json({ error: screenshot.error });
     return;
   }
 
@@ -94,6 +111,8 @@ router.post("/tickets", async (req, res): Promise<void> => {
       category: parsed.data.category,
       priority: parsed.data.priority,
       location: parsed.data.location ?? null,
+      anydeskId: parsed.data.anydeskId ?? null,
+      screenshotUrl: screenshot.value,
     })
     .returning();
 
@@ -146,6 +165,15 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
   if (parsed.data.description !== undefined) updateData.description = parsed.data.description;
   if (parsed.data.category !== undefined) updateData.category = parsed.data.category;
   if (parsed.data.location !== undefined) updateData.location = parsed.data.location;
+  if (parsed.data.anydeskId !== undefined) updateData.anydeskId = parsed.data.anydeskId;
+  if (parsed.data.screenshotUrl !== undefined) {
+    const screenshot = validateScreenshot(parsed.data.screenshotUrl);
+    if (!screenshot.ok) {
+      res.status(400).json({ error: screenshot.error });
+      return;
+    }
+    updateData.screenshotUrl = screenshot.value;
+  }
 
   const [ticket] = await db
     .update(ticketsTable)

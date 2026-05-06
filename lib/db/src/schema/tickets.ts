@@ -29,6 +29,8 @@ export const ticketsTable = pgTable("tickets", {
   status: statusEnum("status").notNull().default("pending"),
   priority: priorityEnum("priority").notNull().default("medium"),
   location: text("location"),
+  anydeskId: text("anydesk_id"),
+  screenshotUrl: text("screenshot_url"),
   adminNotes: text("admin_notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

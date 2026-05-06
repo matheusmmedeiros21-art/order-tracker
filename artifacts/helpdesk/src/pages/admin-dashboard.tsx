@@ -19,7 +19,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Monitor, Printer, Network, FileCode, Phone, HelpCircle,
   Search, CheckCircle2, Clock, AlertTriangle, PlayCircle,
-  MoreVertical, Trash2, FileText, ChevronDown, Check
+  MoreVertical, Trash2, FileText, ChevronDown, Check, Copy,
+  Image as ImageIcon, X
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -297,6 +298,13 @@ function TicketRow({ ticket, index }: { ticket: Ticket, index: number }) {
   const { toast } = useToast();
   const updateTicket = useUpdateTicket();
   const deleteTicket = useDeleteTicket();
+  const [showImage, setShowImage] = useState(false);
+
+  const copyAnydesk = () => {
+    if (!ticket.anydeskId) return;
+    navigator.clipboard.writeText(ticket.anydeskId).catch(() => {});
+    toast({ title: "AnyDesk copiado", description: ticket.anydeskId });
+  };
 
   const handleStatusChange = (newStatus: TicketStatus) => {
     updateTicket.mutate({
@@ -381,7 +389,7 @@ function TicketRow({ ticket, index }: { ticket: Ticket, index: number }) {
               <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
                 {ticket.description}
               </p>
-              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground/70">
+              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground/70 flex-wrap">
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {format(new Date(ticket.createdAt), "dd/MM/yyyy HH:mm")}
@@ -390,7 +398,62 @@ function TicketRow({ ticket, index }: { ticket: Ticket, index: number }) {
                   <span>• Local: {ticket.location}</span>
                 )}
               </div>
+              {(ticket.anydeskId || ticket.screenshotUrl) && (
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  {ticket.anydeskId && (
+                    <button
+                      type="button"
+                      onClick={copyAnydesk}
+                      className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 hover:bg-blue-500/20 transition-colors text-xs font-mono tracking-wider"
+                      title="Copiar endereço AnyDesk"
+                    >
+                      <span className="uppercase tracking-widest text-[10px] font-sans not-italic text-blue-400/70">AnyDesk</span>
+                      {ticket.anydeskId}
+                      <Copy className="w-3 h-3 opacity-60" />
+                    </button>
+                  )}
+                  {ticket.screenshotUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setShowImage(true)}
+                      className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-300 hover:bg-violet-500/20 transition-colors text-xs"
+                    >
+                      <ImageIcon className="w-3 h-3" />
+                      Ver print
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+
+            <AnimatePresence>
+              {showImage && ticket.screenshotUrl && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+                  onClick={() => setShowImage(false)}
+                >
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    className="relative max-w-5xl max-h-[90vh]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <img src={ticket.screenshotUrl} alt={`Print do chamado #${ticket.id}`} className="max-w-full max-h-[90vh] rounded-xl shadow-2xl" />
+                    <button
+                      type="button"
+                      onClick={() => setShowImage(false)}
+                      className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Actions */}
             <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-0 border-border/50">

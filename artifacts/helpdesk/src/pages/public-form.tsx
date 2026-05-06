@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreateTicketBodyCategory, CreateTicketBodyPriority } from "@workspace/api-client-react";
 import { useCreateTicket } from "@workspace/api-client-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Monitor, Printer, Network, FileCode, Phone, HelpCircle, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  Monitor, Printer, Network, FileCode, Phone, HelpCircle,
+  AlertCircle, ArrowRight, CheckCircle2, ArrowLeft,
+  HelpingHand, ImagePlus, X
+} from "lucide-react";
 
 const formSchema = z.object({
   requesterName: z.string().min(2, "Nome é obrigatório"),
@@ -21,13 +26,48 @@ const formSchema = z.object({
   category: z.nativeEnum(CreateTicketBodyCategory),
   priority: z.nativeEnum(CreateTicketBodyPriority),
   location: z.string().optional(),
+  anydeskId: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
+const MAX_IMAGE_SIDE = 1600;
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+
+async function fileToCompressedDataUrl(file: File): Promise<string> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => reject(new Error("Não foi possível carregar a imagem"));
+    i.src = dataUrl;
+  });
+
+  const ratio = Math.min(1, MAX_IMAGE_SIDE / Math.max(img.width, img.height));
+  const w = Math.round(img.width * ratio);
+  const h = Math.round(img.height * ratio);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas não disponível");
+  ctx.drawImage(img, 0, 0, w, h);
+  return canvas.toDataURL("image/jpeg", 0.78);
+}
+
 export function PublicForm() {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
+  const [screenshot, setScreenshot] = useState<string | null>(null);
+  const [imageProcessing, setImageProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const createTicketMutation = useCreateTicket();
 
   const form = useForm<FormValues>({
@@ -39,24 +79,58 @@ export function PublicForm() {
       category: CreateTicketBodyCategory.computer,
       priority: CreateTicketBodyPriority.low,
       location: "",
+      anydeskId: "",
     },
   });
 
+  async function handleScreenshotChange(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Arquivo inválido", description: "Envie uma imagem.", variant: "destructive" });
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast({ title: "Imagem muito grande", description: "O limite é 8 MB.", variant: "destructive" });
+      return;
+    }
+    setImageProcessing(true);
+    try {
+      const compressed = await fileToCompressedDataUrl(file);
+      setScreenshot(compressed);
+    } catch {
+      toast({ title: "Erro ao processar a imagem", variant: "destructive" });
+    } finally {
+      setImageProcessing(false);
+    }
+  }
+
+  function clearScreenshot() {
+    setScreenshot(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
   function onSubmit(data: FormValues) {
     createTicketMutation.mutate(
-      { data: { ...data, requesterEmail: data.requesterEmail || null } },
+      {
+        data: {
+          ...data,
+          requesterEmail: data.requesterEmail || null,
+          anydeskId: data.anydeskId?.trim() ? data.anydeskId.trim() : null,
+          screenshotUrl: screenshot ?? null,
+        },
+      },
       {
         onSuccess: () => {
           setSubmitted(true);
           toast({
             title: "Chamado aberto com sucesso",
-            description: "A equipe de TI já foi notificada.",
+            description: "Já estou de olho. Volto a falar logo.",
           });
         },
         onError: () => {
           toast({
             title: "Erro ao abrir chamado",
-            description: "Ocorreu um erro. Tente novamente mais tarde.",
+            description: "Tente novamente em instantes.",
             variant: "destructive",
           });
         },
@@ -71,13 +145,6 @@ export function PublicForm() {
     [CreateTicketBodyCategory.software]: <FileCode className="w-5 h-5 text-violet-400" />,
     [CreateTicketBodyCategory.phone]: <Phone className="w-5 h-5 text-green-400" />,
     [CreateTicketBodyCategory.other]: <HelpCircle className="w-5 h-5 text-slate-400" />,
-  };
-
-  const priorityColors: Record<string, string> = {
-    [CreateTicketBodyPriority.low]: "bg-slate-500/10 text-slate-400 border-slate-500/20",
-    [CreateTicketBodyPriority.medium]: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-    [CreateTicketBodyPriority.high]: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-    [CreateTicketBodyPriority.urgent]: "bg-red-500/10 text-red-500 border-red-500/20",
   };
 
   const priorityLabels: Record<string, string> = {
@@ -98,9 +165,16 @@ export function PublicForm() {
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center py-12 px-4 sm:px-6 relative overflow-hidden">
-      {/* Decorative background elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+      <Link
+        href="/"
+        className="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Voltar
+      </Link>
 
       <div className="w-full max-w-2xl z-10">
         <motion.div
@@ -115,7 +189,7 @@ export function PublicForm() {
             Central de Suporte TI
           </h1>
           <p className="text-muted-foreground text-lg">
-            Abra um chamado e nossa equipe ajudará o mais rápido possível.
+            Conta o que aconteceu que eu já começo a olhar.
           </p>
         </motion.div>
 
@@ -250,6 +324,32 @@ export function PublicForm() {
 
                       <FormField
                         control={form.control}
+                        name="anydeskId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Endereço do AnyDesk (Opcional)</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Ex: 123 456 789"
+                                inputMode="numeric"
+                                {...field}
+                                className="bg-background/50 font-mono tracking-wider"
+                              />
+                            </FormControl>
+                            <Link
+                              href="/anydesk"
+                              className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors mt-2"
+                            >
+                              <HelpingHand className="w-3.5 h-3.5" />
+                              Não tem AnyDesk baixado? Veja como baixar
+                            </Link>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
                         name="description"
                         render={({ field }) => (
                           <FormItem>
@@ -266,10 +366,58 @@ export function PublicForm() {
                         )}
                       />
 
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium leading-none">Print do Erro (Opcional)</label>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleScreenshotChange(e.target.files?.[0])}
+                        />
+
+                        {!screenshot ? (
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={imageProcessing}
+                            className="w-full flex flex-col items-center justify-center gap-3 py-8 px-4 rounded-xl border border-dashed border-border bg-background/40 hover:bg-background/60 hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                          >
+                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                              <ImagePlus className="w-5 h-5" />
+                            </div>
+                            <div className="text-center">
+                              <div className="text-sm font-medium">
+                                {imageProcessing ? "Processando..." : "Clique para anexar uma imagem"}
+                              </div>
+                              <div className="text-xs text-muted-foreground/70 mt-1">
+                                PNG, JPG até 8 MB
+                              </div>
+                            </div>
+                          </button>
+                        ) : (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.96 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="relative rounded-xl overflow-hidden border border-border bg-background/40"
+                          >
+                            <img src={screenshot} alt="Print do erro" className="w-full max-h-80 object-contain bg-black/40" />
+                            <button
+                              type="button"
+                              onClick={clearScreenshot}
+                              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/70 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/90 transition-colors"
+                              aria-label="Remover imagem"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </motion.div>
+                        )}
+                      </div>
+
                       <Button
                         type="submit"
                         className="w-full text-base py-6"
-                        disabled={createTicketMutation.isPending}
+                        disabled={createTicketMutation.isPending || imageProcessing}
                       >
                         {createTicketMutation.isPending ? (
                           <span className="flex items-center gap-2">
@@ -309,12 +457,13 @@ export function PublicForm() {
                   >
                     <CheckCircle2 className="w-10 h-10" />
                   </motion.div>
-                  <h2 className="text-2xl font-bold text-foreground mb-3">Chamado Aberto!</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-3">Chamado aberto!</h2>
                   <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                    Recebemos sua solicitação. Nossa equipe de TI já foi notificada e entrará em contato em breve.
+                    Recebi sua mensagem. Já estou de olho e te aviso assim que terminar.
                   </p>
                   <Button variant="outline" onClick={() => {
                     form.reset();
+                    setScreenshot(null);
                     setSubmitted(false);
                   }}>
                     Abrir outro chamado

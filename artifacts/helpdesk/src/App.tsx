@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import { PublicForm } from "@/pages/public-form";
 import { Admin } from "@/pages/admin";
 import { Landing } from "@/pages/landing";
+import { AnydeskGuide } from "@/pages/anydesk-guide";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/novo-chamado" component={PublicForm} />
+      <Route path="/anydesk" component={AnydeskGuide} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
