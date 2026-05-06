@@ -17,8 +17,6 @@ import {
   GetPublicQueueResponse,
 } from "@workspace/api-zod";
 
-const PRIORITY_RANK: Record<string, number> = { urgent: 4, high: 3, medium: 2, low: 1 };
-
 const router: IRouter = Router();
 
 router.get("/tickets/stats", async (req, res): Promise<void> => {
@@ -128,9 +126,6 @@ router.get("/tickets/queue", async (req, res): Promise<void> => {
   const all = await db.select().from(ticketsTable);
 
   const sortByQueue = (a: typeof all[number], b: typeof all[number]) => {
-    const ra = PRIORITY_RANK[a.priority] ?? 0;
-    const rb = PRIORITY_RANK[b.priority] ?? 0;
-    if (ra !== rb) return rb - ra;
     const ta = new Date(a.createdAt).getTime();
     const tb = new Date(b.createdAt).getTime();
     if (ta !== tb) return ta - tb;
@@ -152,7 +147,6 @@ router.get("/tickets/queue", async (req, res): Promise<void> => {
         id: t.id,
         position: i + 1,
         status: t.status,
-        priority: t.priority,
         category: t.category,
         firstName: firstName(t.requesterName),
         createdAt: t.createdAt,
@@ -161,7 +155,6 @@ router.get("/tickets/queue", async (req, res): Promise<void> => {
         id: t.id,
         position: 0,
         status: t.status,
-        priority: t.priority,
         category: t.category,
         firstName: firstName(t.requesterName),
         createdAt: t.createdAt,
@@ -199,13 +192,9 @@ router.get("/tickets/:id/queue-position", async (req, res): Promise<void> => {
   let position = 0;
   let totalAhead = 0;
   if (ticket.status === "pending") {
-    const myRank = PRIORITY_RANK[ticket.priority] ?? 0;
     const myTime = new Date(ticket.createdAt).getTime();
     totalAhead = activePending.filter((t) => {
       if (t.id === ticket.id) return false;
-      const r = PRIORITY_RANK[t.priority] ?? 0;
-      if (r > myRank) return true;
-      if (r < myRank) return false;
       const tTime = new Date(t.createdAt).getTime();
       if (tTime < myTime) return true;
       if (tTime > myTime) return false;
@@ -221,7 +210,6 @@ router.get("/tickets/:id/queue-position", async (req, res): Promise<void> => {
       totalAhead,
       totalActive,
       status: ticket.status,
-      priority: ticket.priority,
     }),
   );
 });

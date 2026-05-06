@@ -129,7 +129,6 @@ export const GetPublicQueueResponse = zod.object({
           .number()
           .describe("1-based position. 0 means in_progress."),
         status: zod.enum(["pending", "in_progress"]),
-        priority: zod.enum(["low", "medium", "high", "urgent"]),
         category: zod.enum([
           "computer",
           "printer",
@@ -141,7 +140,9 @@ export const GetPublicQueueResponse = zod.object({
         firstName: zod.string(),
         createdAt: zod.coerce.date(),
       })
-      .describe("Public, anonymized queue entry (no PII beyond first name)."),
+      .describe(
+        "Public, anonymized queue entry (no PII beyond first name). Priority is intentionally omitted — public queue is pure FIFO.",
+      ),
   ),
   inProgress: zod.array(
     zod
@@ -151,7 +152,6 @@ export const GetPublicQueueResponse = zod.object({
           .number()
           .describe("1-based position. 0 means in_progress."),
         status: zod.enum(["pending", "in_progress"]),
-        priority: zod.enum(["low", "medium", "high", "urgent"]),
         category: zod.enum([
           "computer",
           "printer",
@@ -163,7 +163,9 @@ export const GetPublicQueueResponse = zod.object({
         firstName: zod.string(),
         createdAt: zod.coerce.date(),
       })
-      .describe("Public, anonymized queue entry (no PII beyond first name)."),
+      .describe(
+        "Public, anonymized queue entry (no PII beyond first name). Priority is intentionally omitted — public queue is pure FIFO.",
+      ),
   ),
   totals: zod.object({
     pending: zod.number(),
@@ -189,7 +191,6 @@ export const GetTicketQueuePositionResponse = zod
     totalAhead: zod.number(),
     totalActive: zod.number(),
     status: zod.enum(["pending", "in_progress", "done"]),
-    priority: zod.enum(["low", "medium", "high", "urgent"]),
   })
   .describe(
     "Public queue snapshot. Intentionally omits PII so it can be polled without auth.",

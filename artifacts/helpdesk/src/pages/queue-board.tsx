@@ -25,13 +25,6 @@ const categoryLabel: Record<string, string> = {
   other: "Outros",
 };
 
-const priorityStyle: Record<string, { dot: string; text: string; label: string }> = {
-  urgent: { dot: "bg-red-500", text: "text-red-300", label: "Urgente" },
-  high: { dot: "bg-orange-500", text: "text-orange-300", label: "Alta" },
-  medium: { dot: "bg-yellow-500", text: "text-yellow-300", label: "Média" },
-  low: { dot: "bg-slate-500", text: "text-slate-300", label: "Baixa" },
-};
-
 function formatWaiting(iso: string, now: number): string {
   const diffMs = Math.max(0, now - new Date(iso).getTime());
   const m = Math.floor(diffMs / 60000);
@@ -269,12 +262,11 @@ function QueueRow({
   isMine,
   highlight,
 }: {
-  ticket: { id: number; position: number; status: string; priority: string; category: string; firstName: string; createdAt: string };
+  ticket: { id: number; position: number; status: string; category: string; firstName: string; createdAt: string };
   now: number;
   isMine?: boolean;
   highlight?: boolean;
 }) {
-  const pri = priorityStyle[ticket.priority] ?? priorityStyle.low;
   return (
     <motion.div
       layout
@@ -318,10 +310,6 @@ function QueueRow({
           <span className="inline-flex items-center gap-1">
             {categoryIcon[ticket.category]}
             {categoryLabel[ticket.category] ?? ticket.category}
-          </span>
-          <span className={`inline-flex items-center gap-1.5 ${pri.text}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${pri.dot}`} />
-            {pri.label}
           </span>
           <span className="inline-flex items-center gap-1 text-slate-500">
             <Clock className="w-3 h-3" />

@@ -140,16 +140,6 @@ export const PublicQueueEntryStatus = {
   in_progress: "in_progress",
 } as const;
 
-export type PublicQueueEntryPriority =
-  (typeof PublicQueueEntryPriority)[keyof typeof PublicQueueEntryPriority];
-
-export const PublicQueueEntryPriority = {
-  low: "low",
-  medium: "medium",
-  high: "high",
-  urgent: "urgent",
-} as const;
-
 export type PublicQueueEntryCategory =
   (typeof PublicQueueEntryCategory)[keyof typeof PublicQueueEntryCategory];
 
@@ -163,14 +153,13 @@ export const PublicQueueEntryCategory = {
 } as const;
 
 /**
- * Public, anonymized queue entry (no PII beyond first name).
+ * Public, anonymized queue entry (no PII beyond first name). Priority is intentionally omitted — public queue is pure FIFO.
  */
 export interface PublicQueueEntry {
   id: number;
   /** 1-based position. 0 means in_progress. */
   position: number;
   status: PublicQueueEntryStatus;
-  priority: PublicQueueEntryPriority;
   category: PublicQueueEntryCategory;
   firstName: string;
   createdAt: string;
@@ -197,16 +186,6 @@ export const TicketQueuePositionStatus = {
   done: "done",
 } as const;
 
-export type TicketQueuePositionPriority =
-  (typeof TicketQueuePositionPriority)[keyof typeof TicketQueuePositionPriority];
-
-export const TicketQueuePositionPriority = {
-  low: "low",
-  medium: "medium",
-  high: "high",
-  urgent: "urgent",
-} as const;
-
 /**
  * Public queue snapshot. Intentionally omits PII so it can be polled without auth.
  */
@@ -217,7 +196,6 @@ export interface TicketQueuePosition {
   totalAhead: number;
   totalActive: number;
   status: TicketQueuePositionStatus;
-  priority: TicketQueuePositionPriority;
 }
 
 export type TicketStatsByCategoryItem = {

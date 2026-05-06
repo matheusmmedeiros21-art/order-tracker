@@ -307,7 +307,7 @@ components:
 
     PublicQueueEntry:
       type: object
-      description: Public, anonymized queue entry (no PII beyond first name).
+      description: Public, anonymized queue entry (no PII beyond first name). Priority is intentionally omitted — public queue is pure FIFO.
       properties:
         id:
           type: integer
@@ -317,9 +317,6 @@ components:
         status:
           type: string
           enum: [pending, in_progress]
-        priority:
-          type: string
-          enum: [low, medium, high, urgent]
         category:
           type: string
           enum: [computer, printer, network, software, phone, other]
@@ -332,7 +329,6 @@ components:
         - id
         - position
         - status
-        - priority
         - category
         - firstName
         - createdAt
@@ -376,16 +372,12 @@ components:
         status:
           type: string
           enum: [pending, in_progress, done]
-        priority:
-          type: string
-          enum: [low, medium, high, urgent]
       required:
         - id
         - position
         - totalAhead
         - totalActive
         - status
-        - priority
 
     TicketStats:
       type: object
