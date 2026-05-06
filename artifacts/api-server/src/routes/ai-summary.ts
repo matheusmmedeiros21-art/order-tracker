@@ -7,8 +7,7 @@ import { GetTicketAiSummaryParams, GetTicketAiSummaryResponse } from "@workspace
 const router: IRouter = Router();
 
 const openai = new OpenAI({
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const CATEGORY_PT: Record<string, string> = {
@@ -69,8 +68,9 @@ Responda APENAS com JSON válido, nada mais. Não use markdown nem cercas de có
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.4",
-      max_completion_tokens: 1200,
+      model: "gpt-4o",
+      max_tokens: 1200,
+      temperature: 0.3,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt },
