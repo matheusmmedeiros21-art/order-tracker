@@ -175,7 +175,7 @@ function CinematicShowcase() {
     <section
       ref={containerRef}
       className="relative"
-      style={{ height: "240vh" }}
+      style={{ height: "180vh" }}
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         {/* Parallax background blobs */}
@@ -305,6 +305,94 @@ function MockRow({ position, name, cat, highlight, mine }: { position: string; n
         <div className="mockup-muted text-[10px]">{cat}</div>
       </div>
     </div>
+  );
+}
+
+/**
+ * WordsShowcase — Apple-style minimal text reveal.
+ * 3 phrases reveal sequentially as you scroll (fade + scale + subtle 3D translate).
+ * Light, clean, lots of whitespace.
+ */
+function WordsShowcase() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  const phrases = [
+    { kicker: "Rápido", text: "Abre. Descreve. Pronto." },
+    { kicker: "Transparente", text: "Você vê a fila. Sempre." },
+    { kicker: "Sem fricção", text: "Sem ligar. Sem esperar." },
+  ];
+
+  if (reduceMotion) {
+    return (
+      <section className="py-32 px-6">
+        <div className="max-w-4xl mx-auto space-y-20 text-center">
+          {phrases.map((p, i) => (
+            <div key={i}>
+              <p className="text-[12px] font-medium uppercase tracking-[0.25em] text-[#0071E3] mb-3">{p.kicker}</p>
+              <h3 className="text-3xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]">{p.text}</h3>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section ref={containerRef} className="relative" style={{ height: "260vh" }}>
+      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+        <div className="relative w-full max-w-4xl px-6" style={{ perspective: 1200 }}>
+          {phrases.map((p, i) => {
+            const start = i / phrases.length;
+            const peak = start + 1 / phrases.length / 2;
+            const end = (i + 1) / phrases.length;
+            return <Phrase key={i} kicker={p.kicker} text={p.text} progress={scrollYProgress} start={start} peak={peak} end={end} />;
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Phrase({
+  kicker,
+  text,
+  progress,
+  start,
+  peak,
+  end,
+}: {
+  kicker: string;
+  text: string;
+  progress: import("framer-motion").MotionValue<number>;
+  start: number;
+  peak: number;
+  end: number;
+}) {
+  // Each phrase: fade-in + scale-up + Z-translate during its slot
+  const opacity = useTransform(progress, [start, peak, end], [0, 1, 0]);
+  const scale = useTransform(progress, [start, peak, end], [0.92, 1, 1.04]);
+  const y = useTransform(progress, [start, peak, end], [40, 0, -30]);
+  const rotateX = useTransform(progress, [start, peak, end], [8, 0, -6]);
+  const blur = useTransform(progress, [start, peak, end], [8, 0, 6]);
+  const filter = useTransform(blur, (b) => `blur(${b}px)`);
+
+  return (
+    <motion.div
+      style={{ opacity, scale, y, rotateX, filter, transformPerspective: 1200 }}
+      className="absolute inset-0 flex flex-col items-center justify-center text-center will-change-transform"
+    >
+      <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-4">
+        {kicker}
+      </p>
+      <h3 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold tracking-[-0.04em] text-[#1d1d1f] leading-[1.02]">
+        {text}
+      </h3>
+    </motion.div>
   );
 }
 
@@ -518,6 +606,9 @@ export function Landing() {
 
       {/* Cinematic scroll showcase */}
       <CinematicShowcase />
+
+      {/* 3D-light text reveal */}
+      <WordsShowcase />
 
       {/* How it works */}
       <section className="py-28 md:py-40 px-6 md:px-12 bg-apple-gray">
