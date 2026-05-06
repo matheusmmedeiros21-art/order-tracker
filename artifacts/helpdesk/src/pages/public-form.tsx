@@ -123,6 +123,7 @@ export function PublicForm() {
       {
         onSuccess: (ticket) => {
           setCreatedTicketId(ticket.id);
+          try { window.localStorage.setItem("helpdesk_my_ticket", String(ticket.id)); } catch {}
           setSubmitted(true);
           toast({
             title: `Chamado #${ticket.id} aberto`,

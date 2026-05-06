@@ -20,6 +20,7 @@ import type {
   CreateTicketBody,
   HealthStatus,
   ListTicketsParams,
+  PublicQueue,
   Ticket,
   TicketQueuePosition,
   TicketStats,
@@ -360,6 +361,82 @@ export function useGetTicketStats<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetTicketStatsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Public, non-PII queue snapshot for the live tracking page.
+ * @summary Get the live public queue
+ */
+export const getGetPublicQueueUrl = () => {
+  return `/api/tickets/queue`;
+};
+
+export const getPublicQueue = async (
+  options?: RequestInit,
+): Promise<PublicQueue> => {
+  return customFetch<PublicQueue>(getGetPublicQueueUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetPublicQueueQueryKey = () => {
+  return [`/api/tickets/queue`] as const;
+};
+
+export const getGetPublicQueueQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicQueue>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicQueue>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetPublicQueueQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicQueue>>> = ({
+    signal,
+  }) => getPublicQueue({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicQueue>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetPublicQueueQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicQueue>>
+>;
+export type GetPublicQueueQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the live public queue
+ */
+
+export function useGetPublicQueue<
+  TData = Awaited<ReturnType<typeof getPublicQueue>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicQueue>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetPublicQueueQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

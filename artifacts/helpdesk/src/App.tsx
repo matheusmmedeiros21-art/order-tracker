@@ -7,6 +7,7 @@ import { PublicForm } from "@/pages/public-form";
 import { Admin } from "@/pages/admin";
 import { Landing } from "@/pages/landing";
 import { AnydeskGuide } from "@/pages/anydesk-guide";
+import { QueueBoard } from "@/pages/queue-board";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/novo-chamado" component={PublicForm} />
       <Route path="/anydesk" component={AnydeskGuide} />
+      <Route path="/fila" component={QueueBoard} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>

@@ -14,6 +14,7 @@ import {
   GetTicketStatsResponse,
   GetTicketQueuePositionParams,
   GetTicketQueuePositionResponse,
+  GetPublicQueueResponse,
 } from "@workspace/api-zod";
 
 const PRIORITY_RANK: Record<string, number> = { urgent: 4, high: 3, medium: 2, low: 1 };
@@ -121,6 +122,57 @@ router.post("/tickets", async (req, res): Promise<void> => {
     .returning();
 
   res.status(201).json(GetTicketResponse.parse(ticket));
+});
+
+router.get("/tickets/queue", async (req, res): Promise<void> => {
+  const all = await db.select().from(ticketsTable);
+
+  const sortByQueue = (a: typeof all[number], b: typeof all[number]) => {
+    const ra = PRIORITY_RANK[a.priority] ?? 0;
+    const rb = PRIORITY_RANK[b.priority] ?? 0;
+    if (ra !== rb) return rb - ra;
+    const ta = new Date(a.createdAt).getTime();
+    const tb = new Date(b.createdAt).getTime();
+    if (ta !== tb) return ta - tb;
+    return a.id - b.id;
+  };
+
+  const pendingSorted = all.filter((t) => t.status === "pending").sort(sortByQueue);
+  const inProgress = all.filter((t) => t.status === "in_progress").sort(sortByQueue);
+
+  const firstName = (full: string) => (full.trim().split(/\s+/)[0] ?? "").slice(0, 24);
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const doneToday = all.filter((t) => t.status === "done" && new Date(t.updatedAt) >= startOfToday).length;
+
+  res.json(
+    GetPublicQueueResponse.parse({
+      pending: pendingSorted.map((t, i) => ({
+        id: t.id,
+        position: i + 1,
+        status: t.status,
+        priority: t.priority,
+        category: t.category,
+        firstName: firstName(t.requesterName),
+        createdAt: t.createdAt,
+      })),
+      inProgress: inProgress.map((t) => ({
+        id: t.id,
+        position: 0,
+        status: t.status,
+        priority: t.priority,
+        category: t.category,
+        firstName: firstName(t.requesterName),
+        createdAt: t.createdAt,
+      })),
+      totals: {
+        pending: pendingSorted.length,
+        inProgress: inProgress.length,
+        doneToday,
+      },
+    }),
+  );
 });
 
 router.get("/tickets/:id/queue-position", async (req, res): Promise<void> => {

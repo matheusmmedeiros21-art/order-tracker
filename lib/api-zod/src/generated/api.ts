@@ -117,6 +117,62 @@ export const GetTicketStatsResponse = zod.object({
 });
 
 /**
+ * Public, non-PII queue snapshot for the live tracking page.
+ * @summary Get the live public queue
+ */
+export const GetPublicQueueResponse = zod.object({
+  pending: zod.array(
+    zod
+      .object({
+        id: zod.number(),
+        position: zod
+          .number()
+          .describe("1-based position. 0 means in_progress."),
+        status: zod.enum(["pending", "in_progress"]),
+        priority: zod.enum(["low", "medium", "high", "urgent"]),
+        category: zod.enum([
+          "computer",
+          "printer",
+          "network",
+          "software",
+          "phone",
+          "other",
+        ]),
+        firstName: zod.string(),
+        createdAt: zod.coerce.date(),
+      })
+      .describe("Public, anonymized queue entry (no PII beyond first name)."),
+  ),
+  inProgress: zod.array(
+    zod
+      .object({
+        id: zod.number(),
+        position: zod
+          .number()
+          .describe("1-based position. 0 means in_progress."),
+        status: zod.enum(["pending", "in_progress"]),
+        priority: zod.enum(["low", "medium", "high", "urgent"]),
+        category: zod.enum([
+          "computer",
+          "printer",
+          "network",
+          "software",
+          "phone",
+          "other",
+        ]),
+        firstName: zod.string(),
+        createdAt: zod.coerce.date(),
+      })
+      .describe("Public, anonymized queue entry (no PII beyond first name)."),
+  ),
+  totals: zod.object({
+    pending: zod.number(),
+    inProgress: zod.number(),
+    doneToday: zod.number(),
+  }),
+});
+
+/**
  * Returns position by priority then arrival order. 0 means in_progress or done.
  * @summary Get a ticket's current position in the queue
  */

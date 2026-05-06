@@ -132,6 +132,62 @@ export interface UpdateTicketBody {
   screenshotUrl?: string | null;
 }
 
+export type PublicQueueEntryStatus =
+  (typeof PublicQueueEntryStatus)[keyof typeof PublicQueueEntryStatus];
+
+export const PublicQueueEntryStatus = {
+  pending: "pending",
+  in_progress: "in_progress",
+} as const;
+
+export type PublicQueueEntryPriority =
+  (typeof PublicQueueEntryPriority)[keyof typeof PublicQueueEntryPriority];
+
+export const PublicQueueEntryPriority = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  urgent: "urgent",
+} as const;
+
+export type PublicQueueEntryCategory =
+  (typeof PublicQueueEntryCategory)[keyof typeof PublicQueueEntryCategory];
+
+export const PublicQueueEntryCategory = {
+  computer: "computer",
+  printer: "printer",
+  network: "network",
+  software: "software",
+  phone: "phone",
+  other: "other",
+} as const;
+
+/**
+ * Public, anonymized queue entry (no PII beyond first name).
+ */
+export interface PublicQueueEntry {
+  id: number;
+  /** 1-based position. 0 means in_progress. */
+  position: number;
+  status: PublicQueueEntryStatus;
+  priority: PublicQueueEntryPriority;
+  category: PublicQueueEntryCategory;
+  firstName: string;
+  createdAt: string;
+}
+
+export type PublicQueueTotals = {
+  pending: number;
+  inProgress: number;
+  doneToday: number;
+};
+
+export interface PublicQueue {
+  pending: PublicQueueEntry[];
+  inProgress: PublicQueueEntry[];
+  totals: PublicQueueTotals;
+}
+
 export type TicketQueuePositionStatus =
   (typeof TicketQueuePositionStatus)[keyof typeof TicketQueuePositionStatus];
 

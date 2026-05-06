@@ -86,6 +86,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/TicketStats"
 
+  /tickets/queue:
+    get:
+      operationId: getPublicQueue
+      tags: [tickets]
+      summary: Get the live public queue
+      description: Public, non-PII queue snapshot for the live tracking page.
+      responses:
+        "200":
+          description: Public queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicQueue"
+
   /tickets/{id}/queue-position:
     get:
       operationId: getTicketQueuePosition
@@ -290,6 +304,61 @@ components:
         screenshotUrl:
           type: string
           nullable: true
+
+    PublicQueueEntry:
+      type: object
+      description: Public, anonymized queue entry (no PII beyond first name).
+      properties:
+        id:
+          type: integer
+        position:
+          type: integer
+          description: 1-based position. 0 means in_progress.
+        status:
+          type: string
+          enum: [pending, in_progress]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        category:
+          type: string
+          enum: [computer, printer, network, software, phone, other]
+        firstName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - position
+        - status
+        - priority
+        - category
+        - firstName
+        - createdAt
+
+    PublicQueue:
+      type: object
+      properties:
+        pending:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicQueueEntry"
+        inProgress:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicQueueEntry"
+        totals:
+          type: object
+          properties:
+            pending:
+              type: integer
+            inProgress:
+              type: integer
+            doneToday:
+              type: integer
+          required: [pending, inProgress, doneToday]
+      required: [pending, inProgress, totals]
 
     TicketQueuePosition:
       type: object

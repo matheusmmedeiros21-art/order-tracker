@@ -79,9 +79,14 @@ export function AnydeskGuide() {
           Voltar
         </Link>
         <div className="font-semibold text-lg tracking-tight">Central de Suporte TI</div>
-        <Link href="/novo-chamado" className="text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
-          Abrir chamado
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/fila" className="text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
+            Fila
+          </Link>
+          <Link href="/novo-chamado" className="text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
+            Abrir chamado
+          </Link>
+        </div>
       </nav>
 
       {/* Hero */}
