@@ -17,7 +17,11 @@ import {
   CheckCircle2,
   Clock,
   PlayCircle,
+  Activity,
+  Users,
+  Sparkles,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 /**
  * RiseLines — Apple-style "letters rise from below" reveal.
@@ -129,6 +133,179 @@ function RiseFade({
   );
 }
 
+/**
+ * CinematicHero — Apple iPad-Pro style sticky scroll showcase.
+ * Pinned section where a centered "device" scales up and reduces rotateX
+ * while parallax blobs drift behind it. Driven by continuous scroll progress.
+ */
+function CinematicShowcase() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Continuous, eased transforms (cinematic feel)
+  const scale = useTransform(scrollYProgress, [0, 0.45, 0.85, 1], [0.78, 1, 1.04, 1.06]);
+  const rotateX = useTransform(scrollYProgress, [0, 0.5, 1], [10, 0, -2]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.85, 1], [0.2, 1, 1, 0.8]);
+  const y = useTransform(scrollYProgress, [0, 1], [40, -40]);
+
+  // Parallax blobs — different speeds
+  const blobAY = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const blobBY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const blobAOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.6, 1, 0.7]);
+
+  // Caption fade
+  const captionOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  const captionY = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [30, 0, 0, -20]);
+
+  if (reduceMotion) {
+    return (
+      <section className="relative py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <DeviceMockup />
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      ref={containerRef}
+      className="relative"
+      style={{ height: "220vh" }}
+    >
+      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+        {/* Parallax background blobs */}
+        <motion.div
+          aria-hidden
+          style={{ y: blobAY, opacity: blobAOpacity }}
+          className="absolute -top-32 left-[10%] w-[520px] h-[520px] rounded-full blur-3xl will-change-transform"
+        >
+          <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(0,113,227,0.35),transparent_70%)]" />
+        </motion.div>
+        <motion.div
+          aria-hidden
+          style={{ y: blobBY }}
+          className="absolute -bottom-32 right-[5%] w-[600px] h-[600px] rounded-full blur-3xl will-change-transform"
+        >
+          <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_70%_70%,rgba(125,122,255,0.28),transparent_70%)]" />
+        </motion.div>
+
+        {/* Caption above */}
+        <motion.div
+          style={{ opacity: captionOpacity, y: captionY }}
+          className="absolute top-[12vh] inset-x-0 text-center px-6 will-change-transform"
+        >
+          <p className="text-[12px] font-medium uppercase tracking-[0.25em] text-[#0071E3] mb-3">
+            Em tempo real
+          </p>
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.035em] text-[#1d1d1f] leading-[1.05] max-w-3xl mx-auto">
+            Acompanhe sua posição.
+            <br />
+            <span className="text-[#86868b]">Sem ligação. Sem espera.</span>
+          </h2>
+        </motion.div>
+
+        {/* Device — scales/rotates with scroll */}
+        <motion.div
+          style={{
+            scale,
+            rotateX,
+            opacity,
+            y,
+            transformPerspective: 1400,
+          }}
+          className="relative w-[88vw] max-w-[960px] will-change-transform"
+        >
+          <DeviceMockup />
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function DeviceMockup() {
+  return (
+    <div className="mockup-surface relative rounded-[24px] overflow-hidden border border-black/[0.08] dark:border-white/[0.10] shadow-[0_30px_80px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,113,227,0.12)]">
+      {/* Title bar */}
+      <div className="mockup-titlebar px-5 py-3 flex items-center gap-2 border-b border-black/[0.05] dark:border-white/[0.06]">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+        <span className="mockup-muted ml-3 text-[11px] tracking-tight">suporte.ti / fila</span>
+      </div>
+
+      {/* Body */}
+      <div className="p-6 md:p-8 grid grid-cols-3 gap-3 md:gap-4">
+        <MockStat icon={<Activity className="w-3.5 h-3.5" />} label="Em atendimento" value="3" accent="var(--mockup-accent-blue)" />
+        <MockStat icon={<Users className="w-3.5 h-3.5" />} label="Na fila" value="6" accent="var(--mockup-accent-purple)" />
+        <MockStat icon={<CheckCircle2 className="w-3.5 h-3.5" />} label="Concluídos" value="12" accent="var(--mockup-accent-green)" />
+      </div>
+
+      <div className="px-6 md:px-8 pb-6 md:pb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mockup-card rounded-2xl border p-4">
+          <div className="mockup-accent flex items-center gap-2 text-[10px] uppercase tracking-widest font-medium mb-3">
+            <Sparkles className="w-3.5 h-3.5" />
+            Sendo atendido
+          </div>
+          <MockRow position="Agora" name="Maria Silva" cat="Computador" highlight />
+        </div>
+        <div className="mockup-card rounded-2xl border p-4">
+          <div className="mockup-muted flex items-center gap-2 text-[10px] uppercase tracking-widest font-medium mb-3">
+            <Users className="w-3.5 h-3.5" />
+            Próximos
+          </div>
+          <div className="space-y-2">
+            <MockRow position="2º" name="João Pedro" cat="Impressora" />
+            <MockRow position="3º" name="Ana Souza" cat="Rede" mine />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MockStat({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent: string }) {
+  return (
+    <div className="mockup-card rounded-xl border p-3 md:p-4">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-medium" style={{ color: accent }}>
+        {icon}
+        <span className="truncate">{label}</span>
+      </div>
+      <div className="mockup-fg text-2xl md:text-3xl font-semibold tracking-[-0.03em] mt-1 tabular-nums">{value}</div>
+    </div>
+  );
+}
+
+function MockRow({ position, name, cat, highlight, mine }: { position: string; name: string; cat: string; highlight?: boolean; mine?: boolean }) {
+  const tone = mine
+    ? "mockup-row mockup-row--mine"
+    : highlight
+      ? "mockup-row mockup-row--highlight"
+      : "mockup-row mockup-row--default";
+  return (
+    <div className={`flex items-center gap-3 p-2.5 rounded-xl border ${tone}`}>
+      <div className="w-10 text-center">
+        {position === "Agora" ? (
+          <div className="mockup-accent text-[9px] uppercase tracking-widest font-semibold">Agora</div>
+        ) : (
+          <div className="mockup-fg text-base font-semibold tabular-nums">{position}</div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="mockup-fg text-[12px] font-medium truncate">{name}</span>
+          {mine && <span className="mockup-accent text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-[#0071E3]/15 font-medium">Você</span>}
+        </div>
+        <div className="mockup-muted text-[10px]">{cat}</div>
+      </div>
+    </div>
+  );
+}
+
 function ScrollScale({
   children,
   className = "",
@@ -207,6 +384,7 @@ function GlassNav() {
           >
             Abrir chamado
           </Link>
+          <ThemeToggle className="-mr-1" />
         </div>
       </div>
     </nav>
@@ -335,6 +513,9 @@ export function Landing() {
           </RiseFade>
         </div>
       </section>
+
+      {/* Cinematic scroll showcase */}
+      <CinematicShowcase />
 
       {/* How it works */}
       <section className="py-28 md:py-40 px-6 md:px-12 bg-apple-gray">

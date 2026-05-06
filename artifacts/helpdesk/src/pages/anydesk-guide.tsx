@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { motion, useInView } from "framer-motion";
 import { Download, Monitor, ArrowRight, ArrowLeft, Apple, Check, Copy } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function GlassNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -28,6 +29,7 @@ function GlassNav() {
           <Link href="/novo-chamado" className="text-[13px] text-[#0071E3] hover:underline">
             Abrir chamado
           </Link>
+          <ThemeToggle />
         </div>
       </div>
     </nav>

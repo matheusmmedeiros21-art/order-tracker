@@ -6,6 +6,7 @@ import {
   Sparkles, Clock, Users, CheckCircle2, Activity
 } from "lucide-react";
 import { useGetPublicQueue, getGetPublicQueueQueryKey } from "@workspace/api-client-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const categoryIcon: Record<string, React.ReactNode> = {
   computer: <Monitor className="w-4 h-4" />,
@@ -55,9 +56,12 @@ function GlassNav() {
         <Link href="/" className="text-[15px] font-medium tracking-tight text-[#1d1d1f]">
           Suporte TI
         </Link>
-        <Link href="/novo-chamado" className="text-[13px] text-[#0071E3] hover:underline">
-          Abrir chamado
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/novo-chamado" className="text-[13px] text-[#0071E3] hover:underline">
+            Abrir chamado
+          </Link>
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   );

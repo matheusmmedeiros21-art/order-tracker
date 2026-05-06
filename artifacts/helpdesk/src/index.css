@@ -157,6 +157,25 @@
       linear-gradient(to bottom, #ffffff 0%, #fbfbfd 40%, #f5f5f7 100%);
     background-attachment: fixed;
     min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  html.dark body {
+    background:
+      radial-gradient(ellipse 1200px 600px at 50% -200px, rgba(10, 132, 255, 0.10), transparent 60%),
+      linear-gradient(to bottom, #000000 0%, #07070a 40%, #0b0b0f 100%);
+    color: #f5f5f7;
+  }
+
+  /* Smooth theme switch on common surfaces */
+  body, body * {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+  }
+  /* But never animate transforms / opacity / blur on theme switch — let framer own that */
+  body *:where(.no-theme-transition, [data-no-theme-transition]) {
+    transition: none;
   }
 
   h1, h2, h3, h4 {
@@ -181,6 +200,10 @@
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-bottom-color: rgba(0, 0, 0, 0.06);
   }
+  html.dark .nav-glass.is-scrolled {
+    background: rgba(20, 20, 20, 0.6);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
 
   /* Frosted glass card — Apple-style premium material */
   .glass,
@@ -204,10 +227,28 @@
       0 1px 2px rgba(0, 0, 0, 0.04),
       0 20px 50px rgba(0, 0, 0, 0.10);
   }
+  html.dark .glass,
+  html.dark .card-soft {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      0 10px 40px rgba(0, 0, 0, 0.5);
+  }
+  html.dark .card-soft:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.5),
+      0 20px 60px rgba(0, 0, 0, 0.6);
+  }
 
   /* Apple subtle gray section background — for variety, not full bg */
   .bg-apple-gray {
     background: linear-gradient(to bottom, #f5f5f7 0%, #ececef 100%);
+  }
+  html.dark .bg-apple-gray {
+    background: linear-gradient(to bottom, #0e0e12 0%, #131318 100%);
   }
 
   /* Subtle radial glow for hero — sits over body gradient */
@@ -216,6 +257,42 @@
       radial-gradient(ellipse 90% 60% at 50% 0%, rgba(0, 113, 227, 0.10), transparent 65%),
       radial-gradient(ellipse 60% 40% at 85% 25%, rgba(88, 86, 214, 0.06), transparent 60%);
   }
+  html.dark .bg-hero-glow {
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(10, 132, 255, 0.18), transparent 65%),
+      radial-gradient(ellipse 60% 40% at 85% 25%, rgba(125, 122, 255, 0.10), transparent 60%);
+  }
+
+  /* === Theme-aware text helpers === */
+  .text-themed-strong { color: #1d1d1f; }
+  .text-themed-muted  { color: #6e6e73; }
+  .text-themed-subtle { color: #86868b; }
+  .bg-themed-soft     { background-color: rgba(0, 0, 0, 0.04); }
+
+  html.dark .text-themed-strong { color: #f5f5f7; }
+  html.dark .text-themed-muted  { color: #a1a1a6; }
+  html.dark .text-themed-subtle { color: #86868b; }
+  html.dark .bg-themed-soft     { background-color: rgba(255, 255, 255, 0.06); }
+
+  /* === Dark-mode overrides for hard-coded color literals used across pages === */
+  html.dark .text-\[\#1d1d1f\]       { color: #f5f5f7; }
+  html.dark .text-\[\#1d1d1f\]\/80   { color: rgba(245, 245, 247, 0.85); }
+  html.dark .text-\[\#1d1d1f\]\/70   { color: rgba(245, 245, 247, 0.75); }
+  html.dark .text-\[\#6e6e73\]       { color: #a1a1a6; }
+  html.dark .text-\[\#86868b\]       { color: #86868b; }
+  html.dark .text-\[\#d2d2d7\]       { color: #4a4a4f; }
+
+  html.dark .bg-white                 { background-color: rgba(255,255,255,0.05); }
+  html.dark .bg-white\/80             { background-color: rgba(20,20,20,0.6); }
+  html.dark .bg-white\/70             { background-color: rgba(20,20,20,0.5); }
+  html.dark .bg-\[\#f5f5f7\]          { background-color: rgba(255,255,255,0.05); }
+
+  html.dark .border-black\/\[0\.06\]  { border-color: rgba(255,255,255,0.08); }
+  html.dark .border-black\/\[0\.08\]  { border-color: rgba(255,255,255,0.10); }
+  html.dark .border-black\/\[0\.05\]  { border-color: rgba(255,255,255,0.06); }
+  html.dark .border-black\/\[0\.1\]   { border-color: rgba(255,255,255,0.10); }
+
+  html.dark .selection\:bg-\[\#0071E3\]\/15 ::selection { background-color: rgba(10,132,255,0.3); }
 
   /* Pill button (Apple) */
   .btn-pill {
@@ -359,4 +436,71 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+}
+
+/* ===== DeviceMockup — theme-aware surface (used in CinematicShowcase) ===== */
+:root {
+  --mockup-surface-from: rgba(255, 255, 255, 0.95);
+  --mockup-surface-to:   rgba(245, 245, 247, 0.92);
+  --mockup-titlebar:     rgba(255, 255, 255, 0.55);
+  --mockup-card-bg:      rgba(255, 255, 255, 0.70);
+  --mockup-card-border:  rgba(0, 0, 0, 0.06);
+  --mockup-fg:           #1d1d1f;
+  --mockup-muted:        #86868b;
+  --mockup-accent-blue:   #0071E3;
+  --mockup-accent-purple: #7c3aed;
+  --mockup-accent-green:  #16a34a;
+  --mockup-row-default-bg:     #f5f5f7;
+  --mockup-row-default-border: rgba(0, 0, 0, 0.04);
+  --mockup-row-highlight-bg:     rgba(0, 113, 227, 0.05);
+  --mockup-row-highlight-border: rgba(0, 113, 227, 0.15);
+  --mockup-row-mine-bg:     rgba(0, 113, 227, 0.08);
+  --mockup-row-mine-border: rgba(0, 113, 227, 0.30);
+}
+.dark {
+  --mockup-surface-from: rgba(28, 28, 32, 0.92);
+  --mockup-surface-to:   rgba(18, 18, 22, 0.92);
+  --mockup-titlebar:     rgba(255, 255, 255, 0.04);
+  --mockup-card-bg:      rgba(255, 255, 255, 0.05);
+  --mockup-card-border:  rgba(255, 255, 255, 0.08);
+  --mockup-fg:           #f5f5f7;
+  --mockup-muted:        #a1a1a6;
+  --mockup-accent-blue:   #0a84ff;
+  --mockup-accent-purple: #a78bfa;
+  --mockup-accent-green:  #30d158;
+  --mockup-row-default-bg:     rgba(255, 255, 255, 0.04);
+  --mockup-row-default-border: rgba(255, 255, 255, 0.06);
+  --mockup-row-highlight-bg:     rgba(10, 132, 255, 0.10);
+  --mockup-row-highlight-border: rgba(10, 132, 255, 0.30);
+  --mockup-row-mine-bg:     rgba(10, 132, 255, 0.18);
+  --mockup-row-mine-border: rgba(10, 132, 255, 0.45);
+}
+
+.mockup-surface {
+  background: linear-gradient(180deg, var(--mockup-surface-from), var(--mockup-surface-to));
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+.mockup-titlebar { background-color: var(--mockup-titlebar); }
+.mockup-card {
+  background-color: var(--mockup-card-bg);
+  border-color: var(--mockup-card-border) !important;
+}
+.mockup-fg { color: var(--mockup-fg) !important; }
+.mockup-muted { color: var(--mockup-muted) !important; }
+.mockup-accent { color: var(--mockup-accent-blue) !important; }
+
+.mockup-row { transition: background-color 0.2s ease, border-color 0.2s ease; }
+.mockup-row--default {
+  background-color: var(--mockup-row-default-bg);
+  border-color: var(--mockup-row-default-border) !important;
+}
+.mockup-row--highlight {
+  background-color: var(--mockup-row-highlight-bg);
+  border-color: var(--mockup-row-highlight-border) !important;
+}
+.mockup-row--mine {
+  background-color: var(--mockup-row-mine-bg);
+  border-color: var(--mockup-row-mine-border) !important;
+  box-shadow: 0 0 0 1px var(--mockup-row-mine-border);
 }

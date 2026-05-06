@@ -2,6 +2,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Lock, ArrowLeft, AlertCircle, LogOut } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AdminDashboard } from "./admin-dashboard";
@@ -33,6 +34,9 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <div className="min-h-screen text-[#1d1d1f] font-sans flex items-center justify-center px-4 relative overflow-hidden bg-hero-glow">
+      <div className="absolute top-6 right-6 md:top-10 md:right-12 z-10">
+        <ThemeToggle />
+      </div>
       <Link
         href="/"
         className="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-2 text-sm text-[#1d1d1f]/70 hover:text-[#1d1d1f] transition-colors z-10"

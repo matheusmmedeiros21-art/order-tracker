@@ -21,6 +21,7 @@ import {
   MoreVertical, Trash2, FileText, ChevronDown, Check, Copy,
   Image as ImageIcon, X
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -90,9 +91,12 @@ function GlassNav() {
           </div>
           <span className="text-[15px] font-medium tracking-tight text-[#1d1d1f]">TI · Admin</span>
         </div>
-        <Link href="/" className="text-[13px] tracking-tight text-[#0071E3] hover:underline">
-          Página pública
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/" className="text-[13px] tracking-tight text-[#0071E3] hover:underline">
+            Página pública
+          </Link>
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   );

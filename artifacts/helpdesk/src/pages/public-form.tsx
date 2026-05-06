@@ -18,6 +18,7 @@ import {
   AlertCircle, ArrowRight, CheckCircle2, ArrowLeft,
   HelpingHand, ImagePlus, X, Bell, BellOff, Users, Sparkles
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const formSchema = z.object({
   requesterName: z.string().min(2, "Nome é obrigatório"),
@@ -80,9 +81,12 @@ function GlassNav() {
         <Link href="/" className="text-[15px] font-medium tracking-tight text-[#1d1d1f]">
           Suporte TI
         </Link>
-        <Link href="/fila" className="text-[13px] text-[#0071E3] hover:underline">
-          Ver fila
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/fila" className="text-[13px] text-[#0071E3] hover:underline">
+            Ver fila
+          </Link>
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   );
