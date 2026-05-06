@@ -67,8 +67,18 @@ const statusLabels: Record<string, string> = {
   [TicketStatus.done]: "Concluído",
 };
 
+const PRIORITY_ORDER: Record<string, number> = {
+  [TicketPriority.urgent]: 0,
+  [TicketPriority.high]: 1,
+  [TicketPriority.medium]: 2,
+  [TicketPriority.low]: 3,
+};
+
+type SortMode = "arrival" | "priority";
+
 export function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortMode, setSortMode] = useState<SortMode>("arrival");
   const [search, setSearch] = useState("");
   
   const queryClient = useQueryClient();
@@ -84,14 +94,30 @@ export function AdminDashboard() {
   );
 
   const filteredTickets = useMemo(() => {
-    if (!search) return tickets;
     const lower = search.toLowerCase();
-    return tickets.filter(t => 
-      t.id.toString().includes(lower) ||
-      t.requesterName.toLowerCase().includes(lower) ||
-      t.description.toLowerCase().includes(lower)
-    );
-  }, [tickets, search]);
+    const base = !search
+      ? [...tickets]
+      : tickets.filter(t =>
+          t.id.toString().includes(lower) ||
+          t.requesterName.toLowerCase().includes(lower) ||
+          t.description.toLowerCase().includes(lower)
+        );
+
+    if (sortMode === "priority") {
+      base.sort((a, b) => {
+        const pa = PRIORITY_ORDER[a.priority] ?? 99;
+        const pb = PRIORITY_ORDER[b.priority] ?? 99;
+        if (pa !== pb) return pa - pb;
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+    } else {
+      base.sort((a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    }
+
+    return base;
+  }, [tickets, search, sortMode]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -139,6 +165,39 @@ export function AdminDashboard() {
             value={statsLoading ? null : stats?.done} 
             icon={<CheckCircle2 className="w-4 h-4 text-green-400" />} 
           />
+        </div>
+
+        {/* Queue Tabs */}
+        <div className="flex items-center gap-1 p-1 bg-card border rounded-xl w-full sm:w-fit">
+          {([
+            { mode: "arrival" as SortMode, label: "Por ordem de chegada", icon: <Clock className="w-4 h-4" /> },
+            { mode: "priority" as SortMode, label: "Por prioridade", icon: <AlertTriangle className="w-4 h-4" /> },
+          ]).map((tab) => {
+            const active = sortMode === tab.mode;
+            return (
+              <button
+                key={tab.mode}
+                onClick={() => setSortMode(tab.mode)}
+                className={`relative flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  active
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="queue-tab-bg"
+                    className="absolute inset-0 bg-primary/15 border border-primary/30 rounded-lg"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  {tab.icon}
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Toolbar */}
