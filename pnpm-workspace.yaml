@@ -158,3 +158,27 @@ overrides:
   # drizzle-kit uses esbuild internally on an older version that's vulnerable, this overrides it
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   esbuild: "0.27.3"
+  # ============================================================================
+  # SECURITY: Vulnerability fixes
+  # ============================================================================
+  # picomatch@2.x ReDoS + method injection (GHSA-c2c7-rcm5-vvqj, GHSA-3v7f-55p6-f55p)
+  # path: fast-glob > micromatch > picomatch
+  "micromatch>picomatch": "2.3.2"
+  # picomatch@4.x ReDoS + method injection (GHSA-c2c7-rcm5-vvqj, GHSA-3v7f-55p6-f55p)
+  # path: vite > picomatch
+  "vite>picomatch": "4.0.4"
+  # path-to-regexp DoS via sequential optional groups + multiple wildcards
+  # (GHSA-j3q9-mxjg-w52f, GHSA-27v5-c462-wpq7) — path: express > router > path-to-regexp
+  path-to-regexp: ">=8.4.0"
+  # lodash code injection via _.template + prototype pollution (GHSA-r5fr-rjxr-66jc, GHSA-f23m-r3pf-42rh)
+  # path: recharts > lodash
+  lodash: ">=4.18.0 <5"
+  # brace-expansion zero-step sequence hang (GHSA-f886-m6hf-6m8v)
+  # path: orval > typedoc > minimatch > brace-expansion
+  "minimatch>brace-expansion": ">=2.0.3 <3"
+  # yaml stack overflow via deeply nested YAML (GHSA-48c2-rrv3-qjmp)
+  # path: vite > yaml
+  yaml: ">=2.8.3 <3"
+  # postcss XSS via unescaped </style> (GHSA-qx2v-qp2m-jg93)
+  # path: vite > postcss
+  postcss: ">=8.5.10 <9"
