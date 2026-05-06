@@ -6,6 +6,8 @@ import {
   useTransform,
   useInView,
   useReducedMotion,
+  useMotionValueEvent,
+  type MotionValue,
   type Variants,
 } from "framer-motion";
 import {
@@ -20,6 +22,9 @@ import {
   Activity,
   Users,
   Sparkles,
+  FileText,
+  Send,
+  Check,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -309,10 +314,340 @@ function MockRow({ position, name, cat, highlight, mine }: { position: string; n
 }
 
 /**
- * WordsShowcase — Two phrases that drift downward with the page scroll.
- * Phrase 1 ("Abre. Descreve. Pronto.") lives in the top half (0 → 0.5).
- * Phrase 2 ("Você vê a fila. Sempre.") lives in the bottom half (0.5 → 1).
- * Translucent, fluid, no sticky pinning.
+ * TicketFlowSection — Cinematic Apple-style scroll storytelling.
+ * Sticky scene where a ticket card morphs through 3 stages
+ * (empty → filled → resolved) driven by continuous scroll progress.
+ * Includes layered depth (ghost cards behind), drifting headline,
+ * micro-interactions, and a soft glow at the resolution moment.
+ */
+function TicketFlowSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Headline drift: subtle parallax over the whole sticky scene
+  const headlineY       = useTransform(scrollYProgress, [0, 1], ["-2vh", "12vh"]);
+  const headlineOpacity = useTransform(scrollYProgress, [0, 0.12, 0.85, 1], [0, 1, 1, 0]);
+  const kickerOpacity   = useTransform(scrollYProgress, [0, 0.1, 0.6, 0.75], [0, 1, 1, 0]);
+
+  if (reduceMotion) {
+    return (
+      <section className="py-32 px-6">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="text-center md:text-left">
+            <p className="text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3">Rápido</p>
+            <h3 className="text-3xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]">
+              Abre. Descreve. Pronto.
+            </h3>
+          </div>
+          <TicketFlowCardStatic />
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <>
+      {/* Mobile fallback (below md): static, no sticky/clipping */}
+      <section className="md:hidden py-24 px-6">
+        <div className="max-w-md mx-auto text-center">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3">Rápido</p>
+          <h3 className="text-3xl font-semibold tracking-[-0.04em] text-[#1d1d1f] leading-[1.05] mb-3">
+            Abre. <span className="text-[#86868b]">Descreve.</span> <span className="text-[#0071E3]">Pronto.</span>
+          </h3>
+          <p className="text-[14px] text-[#6e6e73] mb-10 leading-relaxed">
+            Três passos para resolver. Sem ligação, sem espera, sem rodeio.
+          </p>
+          <TicketFlowCardStatic />
+        </div>
+      </section>
+
+      {/* Desktop cinematic scene */}
+      <section ref={containerRef} className="relative hidden md:block" style={{ height: "320vh" }}>
+        <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
+        {/* Soft ambient gradient that strengthens toward the end */}
+        <ResolveGlow progress={scrollYProgress} />
+
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-6 grid md:grid-cols-2 gap-10 lg:gap-16 items-center">
+          {/* Left: headline (drifts subtly with scroll) */}
+          <motion.div
+            style={{ y: headlineY, opacity: headlineOpacity }}
+            className="text-center md:text-left will-change-transform"
+          >
+            <motion.p
+              style={{ opacity: kickerOpacity }}
+              className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3 md:mb-4"
+            >
+              Rápido
+            </motion.p>
+            <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.04em] text-[#1d1d1f] leading-[1.02]">
+              Abre.{" "}
+              <span className="text-[#86868b]">Descreve.</span>{" "}
+              <span className="text-[#0071E3]">Pronto.</span>
+            </h3>
+            <p className="mt-4 md:mt-6 text-[14px] md:text-[16px] text-[#6e6e73] max-w-md mx-auto md:mx-0 leading-relaxed">
+              Três passos para resolver. Sem ligação, sem espera, sem rodeio.
+            </p>
+          </motion.div>
+
+          {/* Right: animated ticket card */}
+          <div className="relative" style={{ perspective: 1400 }}>
+            <TicketFlowCardAnimated progress={scrollYProgress} />
+          </div>
+        </div>
+      </div>
+    </section>
+    </>
+  );
+}
+
+function ResolveGlow({ progress }: { progress: MotionValue<number> }) {
+  const blueOpacity  = useTransform(progress, [0, 0.4, 1], [0.4, 0.8, 0.5]);
+  const greenOpacity = useTransform(progress, [0.55, 0.85, 1], [0, 0.55, 0.45]);
+  const blueX        = useTransform(progress, [0, 1], ["-10%", "5%"]);
+  const greenX       = useTransform(progress, [0, 1], ["20%", "0%"]);
+  return (
+    <>
+      <motion.div
+        aria-hidden
+        style={{ opacity: blueOpacity, x: blueX }}
+        className="absolute -top-32 -left-20 w-[640px] h-[640px] rounded-full blur-3xl pointer-events-none will-change-transform"
+      >
+        <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(0,113,227,0.30),transparent_70%)]" />
+      </motion.div>
+      <motion.div
+        aria-hidden
+        style={{ opacity: greenOpacity, x: greenX }}
+        className="absolute -bottom-32 -right-20 w-[560px] h-[560px] rounded-full blur-3xl pointer-events-none will-change-transform"
+      >
+        <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_70%_70%,rgba(48,209,88,0.32),transparent_70%)]" />
+      </motion.div>
+    </>
+  );
+}
+
+/**
+ * TicketFlowCardStatic — used on mobile and reduce-motion. No hooks, no scroll.
+ */
+function TicketFlowCardStatic() {
+  return (
+    <div className="mockup-surface relative rounded-3xl border border-black/[0.08] dark:border-white/[0.10] shadow-[0_30px_80px_rgba(0,0,0,0.18)] p-6 md:p-8 max-w-md mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-[#30d158]/15 text-[#30d158] flex items-center justify-center">
+            <Check className="w-4 h-4" />
+          </div>
+          <span className="mockup-fg text-[14px] font-medium">Chamado #128</span>
+        </div>
+        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold rounded-full bg-[#30d158]/15 text-[#1c8a3a] dark:text-[#30d158] px-2.5 py-1">
+          <Check className="w-2.5 h-2.5" /> Resolvido
+        </span>
+      </div>
+      <p className="mockup-muted text-[13px]">Impressora não imprime — driver atualizado.</p>
+    </div>
+  );
+}
+
+/**
+ * TicketFlowCardAnimated — morphs through draft → sending → resolved as scroll advances.
+ * Always called with a real MotionValue, so all hooks run unconditionally.
+ */
+function TicketFlowCardAnimated({ progress }: { progress: MotionValue<number> }) {
+  // Local progress mapped to a comfortable inner window
+  const local = useTransform(progress, [0.05, 0.95], [0, 1]);
+
+  // Card depth — outer card scale + ghost layers behind
+  const cardScale  = useTransform(local, [0, 0.15, 0.55, 1], [0.94, 1, 1.01, 1.02]);
+  const cardY      = useTransform(local, [0, 1], ["8px", "-12px"]);
+  const cardRotX   = useTransform(local, [0, 0.5, 1], [4, 0, -1.5]);
+  const cardOpac   = useTransform(local, [0, 0.12], [0, 1]);
+  const cardBlur   = useTransform(local, [0, 0.12], [8, 0]);
+  const cardFilter = useTransform(cardBlur, (b) => `blur(${b}px)`);
+
+  // Ghost cards behind for layered depth
+  const ghost1Opacity = useTransform(local, [0, 0.15, 0.9, 1], [0, 0.5, 0.5, 0.3]);
+  const ghost2Opacity = useTransform(local, [0, 0.2, 0.9, 1], [0, 0.3, 0.3, 0.15]);
+  const ghost1Y       = useTransform(local, [0, 1], ["12px", "20px"]);
+  const ghost2Y       = useTransform(local, [0, 1], ["24px", "36px"]);
+
+  // Title field — typed character by character
+  const titleStr  = "Impressora não imprime";
+  const titleLen  = useTransform(local, [0.18, 0.42], [0, titleStr.length]);
+  const [titleShown, setTitleShown] = useState("");
+  useMotionValueEvent(titleLen, "change", (v) => {
+    setTitleShown(titleStr.slice(0, Math.max(0, Math.round(v))));
+  });
+
+  // Description field — typed
+  const descStr  = "Aparece erro de driver ao enviar para a fila.";
+  const descLen  = useTransform(local, [0.38, 0.62], [0, descStr.length]);
+  const [descShown, setDescShown] = useState("");
+  useMotionValueEvent(descLen, "change", (v) => {
+    setDescShown(descStr.slice(0, Math.max(0, Math.round(v))));
+  });
+
+  // Caret blink helpers — show only while typing
+  const titleCaretOp = useTransform(local, [0.18, 0.2, 0.42, 0.45], [0, 1, 1, 0]);
+  const descCaretOp  = useTransform(local, [0.38, 0.4, 0.62, 0.65], [0, 1, 1, 0]);
+
+  // Submit button: idle → press → fly out
+  const btnScale   = useTransform(local, [0.62, 0.72, 0.78], [1, 0.96, 1]);
+  const btnY       = useTransform(local, [0.78, 0.84], [0, -8]);
+  const btnOpacity = useTransform(local, [0.62, 0.78, 0.86], [1, 1, 0]);
+
+  // Progress bar (sending) — appears between submit and resolve
+  const sendOpacity = useTransform(local, [0.78, 0.82, 0.9, 0.93], [0, 1, 1, 0]);
+  const sendWidth   = useTransform(local, [0.78, 0.92], ["0%", "100%"]);
+
+  // Resolved overlay — fades in at the end
+  const resolvedOpacity = useTransform(local, [0.88, 0.96], [0, 1]);
+  const resolvedScale   = useTransform(local, [0.88, 0.96], [0.92, 1]);
+  const resolvedY       = useTransform(local, [0.88, 0.96], [16, 0]);
+
+  // Status pill morph (3 crossfaded layers)
+  const draftOp    = useTransform(local, [0.12, 0.2, 0.7, 0.78], [0, 1, 1, 0]);
+  const sendingOp  = useTransform(local, [0.7, 0.78, 0.88, 0.92], [0, 1, 1, 0]);
+  const resolvedOp = useTransform(local, [0.88, 0.96], [0, 1]);
+
+  // Final ring/glow
+  const ringOpacity = useTransform(local, [0.9, 1], [0, 0.45]);
+
+  return (
+    <div className="relative max-w-md mx-auto">
+      {/* Ghost layers behind for depth */}
+      <motion.div
+        aria-hidden
+        style={{ opacity: ghost2Opacity, y: ghost2Y, scale: 0.94 }}
+        className="absolute inset-0 mockup-surface rounded-3xl border border-black/[0.05] dark:border-white/[0.05]"
+      />
+      <motion.div
+        aria-hidden
+        style={{ opacity: ghost1Opacity, y: ghost1Y, scale: 0.97 }}
+        className="absolute inset-0 mockup-surface rounded-3xl border border-black/[0.06] dark:border-white/[0.06]"
+      />
+
+      {/* Soft success ring */}
+      <motion.div
+        aria-hidden
+        style={{ opacity: ringOpacity }}
+        className="absolute -inset-3 rounded-[28px] pointer-events-none"
+      >
+        <div className="w-full h-full rounded-[28px] shadow-[0_0_60px_8px_rgba(48,209,88,0.35)]" />
+      </motion.div>
+
+      {/* Main card */}
+      <motion.div
+        style={{
+          scale: cardScale,
+          y: cardY,
+          rotateX: cardRotX,
+          opacity: cardOpac,
+          filter: cardFilter,
+          transformPerspective: 1400,
+        }}
+        className="relative mockup-surface rounded-3xl border border-black/[0.08] dark:border-white/[0.10] shadow-[0_30px_80px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,113,227,0.10)] p-6 md:p-7 will-change-transform overflow-hidden"
+      >
+        {/* Header: icon + status pill */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#0071E3]/10 text-[#0071E3] flex items-center justify-center">
+              <FileText className="w-4 h-4" />
+            </div>
+            <span className="mockup-fg text-[13px] font-medium">Novo chamado</span>
+          </div>
+          <div className="relative h-6 w-[88px]">
+            <motion.span
+              style={{ opacity: draftOp }}
+              className="absolute inset-0 inline-flex items-center justify-center text-[10px] uppercase tracking-widest font-semibold rounded-full bg-[#86868b]/15 mockup-muted"
+            >
+              Rascunho
+            </motion.span>
+            <motion.span
+              style={{ opacity: sendingOp }}
+              className="absolute inset-0 inline-flex items-center justify-center gap-1 text-[10px] uppercase tracking-widest font-semibold rounded-full bg-[#0071E3]/15 text-[#0071E3]"
+            >
+              <Send className="w-2.5 h-2.5" />
+              Enviando
+            </motion.span>
+            <motion.span
+              style={{ opacity: resolvedOp }}
+              className="absolute inset-0 inline-flex items-center justify-center gap-1 text-[10px] uppercase tracking-widest font-semibold rounded-full bg-[#30d158]/15 text-[#1c8a3a] dark:text-[#30d158]"
+            >
+              <Check className="w-2.5 h-2.5" />
+              Resolvido
+            </motion.span>
+          </div>
+        </div>
+
+        {/* Title field */}
+        <div className="mb-4">
+          <div className="text-[10px] uppercase tracking-widest mockup-muted font-medium mb-1.5">Título</div>
+          <div className="rounded-xl border border-black/[0.06] dark:border-white/[0.08] px-3.5 py-2.5 bg-white/40 dark:bg-white/[0.03] min-h-[42px] flex items-center">
+            <span className="mockup-fg text-[14px] tabular-nums">{titleShown}</span>
+            <motion.span
+              style={{ opacity: titleCaretOp }}
+              className="inline-block w-[1.5px] h-4 bg-[#0071E3] ml-0.5"
+            />
+          </div>
+        </div>
+
+        {/* Description field */}
+        <div className="mb-5">
+          <div className="text-[10px] uppercase tracking-widest mockup-muted font-medium mb-1.5">Descrição</div>
+          <div className="rounded-xl border border-black/[0.06] dark:border-white/[0.08] px-3.5 py-2.5 bg-white/40 dark:bg-white/[0.03] min-h-[64px]">
+            <span className="mockup-fg text-[13px] leading-relaxed">{descShown}</span>
+            <motion.span
+              style={{ opacity: descCaretOp }}
+              className="inline-block w-[1.5px] h-3.5 bg-[#0071E3] ml-0.5 align-middle"
+            />
+          </div>
+        </div>
+
+        {/* Submit button + sending bar */}
+        <div className="relative h-11">
+          <motion.button
+            type="button"
+            aria-hidden
+            tabIndex={-1}
+            style={{ scale: btnScale, y: btnY, opacity: btnOpacity }}
+            className="absolute inset-0 rounded-full bg-[#0071E3] text-white text-[13px] font-medium tracking-tight inline-flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(0,113,227,0.35)] will-change-transform"
+          >
+            Abrir chamado
+            <ArrowRight className="w-3.5 h-3.5" />
+          </motion.button>
+          <motion.div
+            style={{ opacity: sendOpacity }}
+            className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#0071E3]/15 overflow-hidden"
+          >
+            <motion.div
+              style={{ width: sendWidth }}
+              className="h-full bg-gradient-to-r from-[#0071E3] to-[#7c3aed]"
+            />
+          </motion.div>
+        </div>
+
+        {/* Resolved overlay */}
+        <motion.div
+          style={{ opacity: resolvedOpacity, scale: resolvedScale, y: resolvedY }}
+          className="absolute inset-0 mockup-surface flex flex-col items-center justify-center text-center px-8 will-change-transform"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-[#30d158]/15 text-[#30d158] flex items-center justify-center mb-4">
+            <Check className="w-7 h-7" strokeWidth={2.5} />
+          </div>
+          <div className="mockup-fg text-[18px] font-semibold tracking-[-0.02em]">Resolvido</div>
+          <div className="mockup-muted text-[13px] mt-1">Chamado #128 · 12 min</div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+/**
+ * WordsShowcase — Drifting closing phrase ("Você vê a fila. Sempre.").
+ * Translucent, fluid, no sticky pinning — moves down with scroll.
  */
 function WordsShowcase() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -322,57 +657,29 @@ function WordsShowcase() {
     offset: ["start end", "end start"],
   });
 
-  // Phrase 1 — drifts from top to middle as page scrolls 0 → 0.5
-  const p1Y       = useTransform(scrollYProgress, [0, 0.5], ["0vh", "40vh"]);
-  const p1Opacity = useTransform(scrollYProgress, [0, 0.08, 0.42, 0.55], [0, 0.85, 0.85, 0]);
-  const p1Scale   = useTransform(scrollYProgress, [0, 0.5], [0.96, 1.02]);
-  const p1Blur    = useTransform(scrollYProgress, [0, 0.1, 0.45, 0.55], [4, 0, 0, 4]);
-  const p1Filter  = useTransform(p1Blur, (b) => `blur(${b}px)`);
-
-  // Phrase 2 — drifts from middle to bottom as page scrolls 0.5 → 1
-  const p2Y       = useTransform(scrollYProgress, [0.5, 1], ["0vh", "40vh"]);
-  const p2Opacity = useTransform(scrollYProgress, [0.45, 0.6, 0.92, 1], [0, 0.85, 0.85, 0]);
-  const p2Scale   = useTransform(scrollYProgress, [0.5, 1], [0.96, 1.02]);
-  const p2Blur    = useTransform(scrollYProgress, [0.45, 0.6, 0.9, 1], [4, 0, 0, 4]);
-  const p2Filter  = useTransform(p2Blur, (b) => `blur(${b}px)`);
+  const y       = useTransform(scrollYProgress, [0, 1], ["0vh", "40vh"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.75, 1], [0, 0.85, 0.85, 0]);
+  const scale   = useTransform(scrollYProgress, [0, 1], [0.96, 1.02]);
+  const blur    = useTransform(scrollYProgress, [0, 0.2, 0.75, 1], [4, 0, 0, 4]);
+  const filter  = useTransform(blur, (b) => `blur(${b}px)`);
 
   if (reduceMotion) {
     return (
-      <section className="py-32 px-6 space-y-32 text-center">
-        <div>
-          <p className="text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3">Rápido</p>
-          <h3 className="text-3xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]/80">Abre. Descreve. Pronto.</h3>
-        </div>
-        <div>
-          <p className="text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3">Transparente</p>
-          <h3 className="text-3xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]/80">Você vê a fila. Sempre.</h3>
-        </div>
+      <section className="py-32 px-6 text-center">
+        <p className="text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3">Transparente</p>
+        <h3 className="text-3xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]/80">
+          Você vê a fila. Sempre.
+        </h3>
       </section>
     );
   }
 
   return (
-    <section ref={containerRef} className="relative" style={{ height: "200vh" }}>
-      {/* Phrase 1 — top half */}
-      <div className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none">
+    <section ref={containerRef} className="relative" style={{ height: "120vh" }}>
+      <div className="absolute inset-0 pointer-events-none">
         <motion.div
-          style={{ y: p1Y, opacity: p1Opacity, scale: p1Scale, filter: p1Filter }}
+          style={{ y, opacity, scale, filter }}
           className="absolute top-[20vh] inset-x-0 text-center px-6 will-change-transform"
-        >
-          <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3 md:mb-4">
-            Rápido
-          </p>
-          <h3 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold tracking-[-0.04em] text-[#1d1d1f] leading-[1.02]">
-            Abre. Descreve. Pronto.
-          </h3>
-        </motion.div>
-      </div>
-
-      {/* Phrase 2 — bottom half */}
-      <div className="absolute top-1/2 left-0 right-0 h-1/2 pointer-events-none">
-        <motion.div
-          style={{ y: p2Y, opacity: p2Opacity, scale: p2Scale, filter: p2Filter }}
-          className="absolute top-[15vh] inset-x-0 text-center px-6 will-change-transform"
         >
           <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.3em] text-[#0071E3] mb-3 md:mb-4">
             Transparente
@@ -597,7 +904,10 @@ export function Landing() {
       {/* Cinematic scroll showcase */}
       <CinematicShowcase />
 
-      {/* 3D-light text reveal */}
+      {/* Ticket flow — Apple-style storytelling */}
+      <TicketFlowSection />
+
+      {/* Closing drifting phrase */}
       <WordsShowcase />
 
       {/* How it works */}
