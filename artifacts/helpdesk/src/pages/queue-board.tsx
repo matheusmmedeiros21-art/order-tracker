@@ -91,7 +91,7 @@ export function QueueBoard() {
   const totals = data?.totals;
 
   return (
-    <div className="min-h-screen bg-white text-[#1d1d1f] selection:bg-[#0071E3]/15 overflow-x-hidden font-sans">
+    <div className="min-h-screen text-[#1d1d1f] selection:bg-[#0071E3]/15 overflow-x-hidden font-sans">
       <GlassNav />
 
       <section className="relative pt-32 pb-12 md:pt-40 px-6 md:px-12 bg-hero-glow">

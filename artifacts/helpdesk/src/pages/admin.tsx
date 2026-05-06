@@ -32,7 +32,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#1d1d1f] font-sans flex items-center justify-center px-4 relative overflow-hidden bg-hero-glow">
+    <div className="min-h-screen text-[#1d1d1f] font-sans flex items-center justify-center px-4 relative overflow-hidden bg-hero-glow">
       <Link
         href="/"
         className="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-2 text-sm text-[#1d1d1f]/70 hover:text-[#1d1d1f] transition-colors z-10"
@@ -135,7 +135,7 @@ export function Admin() {
   }
 
   if (authed === null) {
-    return <div className="min-h-screen bg-white" />;
+    return <div className="min-h-screen" />;
   }
 
   if (!authed) {

@@ -100,7 +100,7 @@ export function AnydeskGuide() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#1d1d1f] selection:bg-[#0071E3]/15 overflow-x-hidden font-sans">
+    <div className="min-h-screen text-[#1d1d1f] selection:bg-[#0071E3]/15 overflow-x-hidden font-sans">
       <GlassNav />
 
       {/* Hero */}

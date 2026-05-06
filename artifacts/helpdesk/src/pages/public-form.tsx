@@ -193,7 +193,7 @@ export function PublicForm() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white text-[#1d1d1f] flex flex-col items-center pt-32 pb-16 px-4 sm:px-6 relative overflow-hidden font-sans bg-hero-glow">
+    <div className="min-h-screen w-full text-[#1d1d1f] flex flex-col items-center pt-32 pb-16 px-4 sm:px-6 relative overflow-hidden font-sans bg-hero-glow">
       <GlassNav />
 
       <div className="w-full max-w-2xl z-10">

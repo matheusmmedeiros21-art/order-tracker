@@ -240,10 +240,16 @@ function TrackingInput() {
   }
 
   return (
-    <form onSubmit={submit} className="w-full max-w-xl mx-auto">
-      <div className="flex items-stretch gap-2 p-1.5 rounded-[18px] bg-white/80 backdrop-blur-xl border border-black/[0.08] shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-        <div className="pl-4 flex items-center text-[#86868b]">
-          <Search className="w-4 h-4" />
+    <form onSubmit={submit} className="w-full max-w-2xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.9, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        whileHover={{ scale: 1.01 }}
+        className="flex items-stretch gap-2 p-2 rounded-[20px] bg-white/70 backdrop-blur-2xl border border-black/[0.06] shadow-[0_20px_60px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:shadow-[0_30px_80px_rgba(0,113,227,0.15),0_4px_8px_rgba(0,0,0,0.05)]"
+      >
+        <div className="pl-5 flex items-center text-[#86868b]">
+          <Search className="w-5 h-5" />
         </div>
         <input
           inputMode="numeric"
@@ -255,18 +261,18 @@ function TrackingInput() {
             setValue(e.target.value);
             if (error) setError(null);
           }}
-          className="flex-1 bg-transparent border-0 outline-none text-base md:text-[17px] text-[#1d1d1f] placeholder:text-[#86868b] font-mono tracking-wider"
+          className="flex-1 bg-transparent border-0 outline-none text-lg md:text-xl text-[#1d1d1f] placeholder:text-[#86868b] font-mono tracking-wider py-2"
         />
         <button
           type="submit"
-          className="btn-pill btn-pill-primary text-[15px] px-5 py-2.5"
-          style={{ borderRadius: 14 }}
+          className="btn-pill btn-pill-primary text-[15px] px-6 py-3"
+          style={{ borderRadius: 16 }}
         >
           Acompanhar
           <ArrowRight className="w-4 h-4" />
         </button>
-      </div>
-      <div className="mt-3 h-5 text-center text-[13px]">
+      </motion.div>
+      <div className="mt-4 h-5 text-center text-[13px]">
         {error ? (
           <span className="text-red-600">{error}</span>
         ) : (
@@ -285,7 +291,7 @@ export function Landing() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-white text-[#1d1d1f] selection:bg-[#0071E3]/15 overflow-x-hidden font-sans">
+    <div className="relative min-h-screen text-[#1d1d1f] selection:bg-[#0071E3]/15 overflow-x-hidden font-sans">
       <GlassNav />
 
       {/* Hero */}

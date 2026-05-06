@@ -139,7 +139,7 @@ export function AdminDashboard() {
   }, [tickets, search, sortMode]);
 
   return (
-    <div className="min-h-screen bg-white text-[#1d1d1f] flex flex-col font-sans">
+    <div className="min-h-screen text-[#1d1d1f] flex flex-col font-sans">
       <GlassNav />
 
       <main className="flex-1 max-w-7xl w-full mx-auto pt-24 pb-32 px-6 md:px-10 space-y-8">
