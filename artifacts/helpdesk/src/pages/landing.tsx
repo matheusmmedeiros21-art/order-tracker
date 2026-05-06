@@ -180,7 +180,7 @@ function CinematicShowcase() {
     <section
       ref={containerRef}
       className="relative"
-      style={{ height: "150vh" }}
+      style={{ height: "120vh" }}
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         {/* Parallax background blobs */}
@@ -368,7 +368,7 @@ function TicketFlowSection() {
       </section>
 
       {/* Desktop cinematic scene */}
-      <section ref={containerRef} className="relative hidden md:block" style={{ height: "240vh" }}>
+      <section ref={containerRef} className="relative hidden md:block" style={{ height: "180vh" }}>
         <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
         {/* Soft ambient gradient that strengthens toward the end */}
         <ResolveGlow progress={scrollYProgress} />
@@ -681,7 +681,7 @@ function WordsShowcase() {
   return (
     <section
       ref={containerRef}
-      className="relative py-32 md:py-44 md:-mt-[80vh] z-10 bg-gradient-to-b from-transparent via-white/80 to-white dark:via-black/60 dark:to-black"
+      className="relative py-24 md:py-36 md:-mt-[60vh] z-10 bg-gradient-to-b from-transparent via-white/85 to-white dark:via-black/70 dark:to-black"
     >
       <div className="w-full flex items-center justify-center pointer-events-none">
         <motion.div
