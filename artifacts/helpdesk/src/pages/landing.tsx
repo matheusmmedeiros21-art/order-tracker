@@ -175,53 +175,55 @@ function CinematicShowcase() {
     <section
       ref={containerRef}
       className="relative"
-      style={{ height: "220vh" }}
+      style={{ height: "240vh" }}
     >
-      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+      <div className="sticky top-0 h-screen w-full overflow-hidden">
         {/* Parallax background blobs */}
         <motion.div
           aria-hidden
           style={{ y: blobAY, opacity: blobAOpacity }}
-          className="absolute -top-32 left-[10%] w-[520px] h-[520px] rounded-full blur-3xl will-change-transform"
+          className="absolute -top-32 left-[10%] w-[520px] h-[520px] rounded-full blur-3xl will-change-transform pointer-events-none"
         >
           <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(0,113,227,0.35),transparent_70%)]" />
         </motion.div>
         <motion.div
           aria-hidden
           style={{ y: blobBY }}
-          className="absolute -bottom-32 right-[5%] w-[600px] h-[600px] rounded-full blur-3xl will-change-transform"
+          className="absolute -bottom-32 right-[5%] w-[600px] h-[600px] rounded-full blur-3xl will-change-transform pointer-events-none"
         >
           <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_70%_70%,rgba(125,122,255,0.28),transparent_70%)]" />
         </motion.div>
 
-        {/* Caption above */}
-        <motion.div
-          style={{ opacity: captionOpacity, y: captionY }}
-          className="absolute top-[12vh] inset-x-0 text-center px-6 will-change-transform"
-        >
-          <p className="text-[12px] font-medium uppercase tracking-[0.25em] text-[#0071E3] mb-3">
-            Em tempo real
-          </p>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.035em] text-[#1d1d1f] leading-[1.05] max-w-3xl mx-auto">
-            Acompanhe sua posição.
-            <br />
-            <span className="text-[#86868b]">Sem ligação. Sem espera.</span>
-          </h2>
-        </motion.div>
+        {/* Stacked layout: caption on top, device below */}
+        <div className="relative h-full w-full flex flex-col items-center justify-start pt-[6vh] md:pt-[8vh] px-6">
+          {/* Caption */}
+          <motion.div
+            style={{ opacity: captionOpacity, y: captionY }}
+            className="text-center will-change-transform max-w-3xl"
+          >
+            <p className="text-[11px] md:text-[12px] font-medium uppercase tracking-[0.25em] text-[#0071E3] mb-2 md:mb-3">
+              Em tempo real
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f] leading-[1.05]">
+              Acompanhe sua posição.{" "}
+              <span className="text-[#86868b]">Sem ligação. Sem espera.</span>
+            </h2>
+          </motion.div>
 
-        {/* Device — scales/rotates with scroll */}
-        <motion.div
-          style={{
-            scale,
-            rotateX,
-            opacity,
-            y,
-            transformPerspective: 1400,
-          }}
-          className="relative w-[88vw] max-w-[960px] will-change-transform"
-        >
-          <DeviceMockup />
-        </motion.div>
+          {/* Device — scales/rotates with scroll */}
+          <motion.div
+            style={{
+              scale,
+              rotateX,
+              opacity,
+              y,
+              transformPerspective: 1400,
+            }}
+            className="relative w-[88vw] max-w-[920px] will-change-transform mt-8 md:mt-12"
+          >
+            <DeviceMockup />
+          </motion.div>
+        </div>
       </div>
     </section>
   );
