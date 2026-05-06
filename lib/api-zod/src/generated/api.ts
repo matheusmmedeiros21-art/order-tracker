@@ -117,6 +117,29 @@ export const GetTicketStatsResponse = zod.object({
 });
 
 /**
+ * Returns position by priority then arrival order. 0 means in_progress or done.
+ * @summary Get a ticket's current position in the queue
+ */
+export const GetTicketQueuePositionParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetTicketQueuePositionResponse = zod
+  .object({
+    id: zod.number(),
+    position: zod
+      .number()
+      .describe("1-based queue position; 0 if in_progress or done"),
+    totalAhead: zod.number(),
+    totalActive: zod.number(),
+    status: zod.enum(["pending", "in_progress", "done"]),
+    priority: zod.enum(["low", "medium", "high", "urgent"]),
+  })
+  .describe(
+    "Public queue snapshot. Intentionally omits PII so it can be polled without auth.",
+  );
+
+/**
  * @summary Get a single ticket
  */
 export const GetTicketParams = zod.object({

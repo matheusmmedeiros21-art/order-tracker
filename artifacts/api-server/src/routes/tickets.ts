@@ -12,7 +12,11 @@ import {
   GetTicketResponse,
   UpdateTicketResponse,
   GetTicketStatsResponse,
+  GetTicketQueuePositionParams,
+  GetTicketQueuePositionResponse,
 } from "@workspace/api-zod";
+
+const PRIORITY_RANK: Record<string, number> = { urgent: 4, high: 3, medium: 2, low: 1 };
 
 const router: IRouter = Router();
 
@@ -117,6 +121,57 @@ router.post("/tickets", async (req, res): Promise<void> => {
     .returning();
 
   res.status(201).json(GetTicketResponse.parse(ticket));
+});
+
+router.get("/tickets/:id/queue-position", async (req, res): Promise<void> => {
+  const params = GetTicketQueuePositionParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const [ticket] = await db
+    .select()
+    .from(ticketsTable)
+    .where(eq(ticketsTable.id, params.data.id));
+
+  if (!ticket) {
+    res.status(404).json({ error: "Chamado não encontrado" });
+    return;
+  }
+
+  const active = await db.select().from(ticketsTable);
+  const activePending = active.filter((t) => t.status === "pending");
+  const totalActive = active.filter((t) => t.status === "pending" || t.status === "in_progress").length;
+
+  let position = 0;
+  let totalAhead = 0;
+  if (ticket.status === "pending") {
+    const myRank = PRIORITY_RANK[ticket.priority] ?? 0;
+    const myTime = new Date(ticket.createdAt).getTime();
+    totalAhead = activePending.filter((t) => {
+      if (t.id === ticket.id) return false;
+      const r = PRIORITY_RANK[t.priority] ?? 0;
+      if (r > myRank) return true;
+      if (r < myRank) return false;
+      const tTime = new Date(t.createdAt).getTime();
+      if (tTime < myTime) return true;
+      if (tTime > myTime) return false;
+      return t.id < ticket.id;
+    }).length;
+    position = totalAhead + 1;
+  }
+
+  res.json(
+    GetTicketQueuePositionResponse.parse({
+      id: ticket.id,
+      position,
+      totalAhead,
+      totalActive,
+      status: ticket.status,
+      priority: ticket.priority,
+    }),
+  );
 });
 
 router.get("/tickets/:id", async (req, res): Promise<void> => {

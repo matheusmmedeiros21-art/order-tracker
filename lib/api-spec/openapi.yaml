@@ -86,6 +86,28 @@ paths:
               schema:
                 $ref: "#/components/schemas/TicketStats"
 
+  /tickets/{id}/queue-position:
+    get:
+      operationId: getTicketQueuePosition
+      tags: [tickets]
+      summary: Get a ticket's current position in the queue
+      description: Returns position by priority then arrival order. 0 means in_progress or done.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Queue position
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketQueuePosition"
+        "404":
+          description: Ticket not found
+
   /tickets/{id}:
     get:
       operationId: getTicket
@@ -268,6 +290,33 @@ components:
         screenshotUrl:
           type: string
           nullable: true
+
+    TicketQueuePosition:
+      type: object
+      description: Public queue snapshot. Intentionally omits PII so it can be polled without auth.
+      properties:
+        id:
+          type: integer
+        position:
+          type: integer
+          description: 1-based queue position; 0 if in_progress or done
+        totalAhead:
+          type: integer
+        totalActive:
+          type: integer
+        status:
+          type: string
+          enum: [pending, in_progress, done]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+      required:
+        - id
+        - position
+        - totalAhead
+        - totalActive
+        - status
+        - priority
 
     TicketStats:
       type: object

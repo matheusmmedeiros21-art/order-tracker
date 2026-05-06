@@ -1,11 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreateTicketBodyCategory, CreateTicketBodyPriority } from "@workspace/api-client-react";
-import { useCreateTicket } from "@workspace/api-client-react";
+import { useCreateTicket, useGetTicketQueuePosition, getGetTicketQueuePositionQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Monitor, Printer, Network, FileCode, Phone, HelpCircle,
   AlertCircle, ArrowRight, CheckCircle2, ArrowLeft,
-  HelpingHand, ImagePlus, X
+  HelpingHand, ImagePlus, X, Bell, BellOff, Users, Sparkles
 } from "lucide-react";
 
 const formSchema = z.object({
@@ -65,6 +65,7 @@ async function fileToCompressedDataUrl(file: File): Promise<string> {
 export function PublicForm() {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
+  const [createdTicketId, setCreatedTicketId] = useState<number | null>(null);
   const [screenshot, setScreenshot] = useState<string | null>(null);
   const [imageProcessing, setImageProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -120,10 +121,11 @@ export function PublicForm() {
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: (ticket) => {
+          setCreatedTicketId(ticket.id);
           setSubmitted(true);
           toast({
-            title: "Chamado aberto com sucesso",
+            title: `Chamado #${ticket.id} aberto`,
             description: "Já estou de olho. Volto a falar logo.",
           });
         },
@@ -440,40 +442,225 @@ export function PublicForm() {
                 </CardContent>
               </Card>
             </motion.div>
-          ) : (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.4, type: "spring" }}
-            >
-              <Card className="border-primary/20 bg-primary/5 text-center py-12">
-                <CardContent className="flex flex-col items-center">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring", bounce: 0.5 }}
-                    className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-6"
-                  >
-                    <CheckCircle2 className="w-10 h-10" />
-                  </motion.div>
-                  <h2 className="text-2xl font-bold text-foreground mb-3">Chamado aberto!</h2>
-                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                    Recebi sua mensagem. Já estou de olho e te aviso assim que terminar.
-                  </p>
-                  <Button variant="outline" onClick={() => {
-                    form.reset();
-                    setScreenshot(null);
-                    setSubmitted(false);
-                  }}>
-                    Abrir outro chamado
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+          ) : createdTicketId !== null ? (
+            <SuccessPanel
+              ticketId={createdTicketId}
+              onReset={() => {
+                form.reset();
+                setScreenshot(null);
+                setCreatedTicketId(null);
+                setSubmitted(false);
+              }}
+            />
+          ) : null}
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+function SuccessPanel({ ticketId, onReset }: { ticketId: number; onReset: () => void }) {
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | "unsupported">(
+    typeof window !== "undefined" && "Notification" in window ? Notification.permission : "unsupported"
+  );
+  const previousStatusRef = useRef<string | null>(null);
+  const notifiedRef = useRef(false);
+
+  const { data, isLoading } = useGetTicketQueuePosition(ticketId, {
+    query: {
+      queryKey: getGetTicketQueuePositionQueryKey(ticketId),
+      refetchInterval: 6000,
+      refetchIntervalInBackground: true,
+    },
+  });
+
+  const status = data?.status ?? null;
+  const position = data?.position ?? null;
+  const totalAhead = data?.totalAhead ?? 0;
+
+  useEffect(() => {
+    if (!status) return;
+    const prev = previousStatusRef.current;
+    if (prev === "pending" && status === "in_progress" && !notifiedRef.current) {
+      notifiedRef.current = true;
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        try {
+          new Notification("Sua vez chegou!", {
+            body: `Chamado #${ticketId}: o suporte está cuidando do seu problema agora.`,
+            tag: `ticket-${ticketId}`,
+          });
+        } catch {
+          /* noop */
+        }
+      }
+    }
+    previousStatusRef.current = status;
+  }, [status, ticketId]);
+
+  function requestPermission() {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    Notification.requestPermission().then((p) => setNotifPermission(p));
+  }
+
+  const isInProgress = status === "in_progress";
+  const isDone = status === "done";
+  const isPending = status === "pending";
+
+  return (
+    <motion.div
+      key="success"
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.4, type: "spring" }}
+    >
+      <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-xl overflow-hidden">
+        <div
+          className={`relative px-8 pt-10 pb-12 text-center transition-colors duration-700 ${
+            isInProgress
+              ? "bg-gradient-to-b from-blue-500/20 via-blue-500/5 to-transparent"
+              : isDone
+                ? "bg-gradient-to-b from-green-500/20 via-green-500/5 to-transparent"
+                : "bg-gradient-to-b from-primary/15 via-primary/5 to-transparent"
+          }`}
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.1, type: "spring", bounce: 0.5 }}
+            className={`inline-flex w-16 h-16 rounded-full items-center justify-center mb-5 ${
+              isInProgress
+                ? "bg-blue-500/20 text-blue-400"
+                : isDone
+                  ? "bg-green-500/20 text-green-400"
+                  : "bg-primary/20 text-primary"
+            }`}
+          >
+            {isInProgress ? <Sparkles className="w-7 h-7" /> : isDone ? <CheckCircle2 className="w-7 h-7" /> : <CheckCircle2 className="w-7 h-7" />}
+          </motion.div>
+
+          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">Seu chamado</div>
+          <div className="text-6xl md:text-7xl font-bold tracking-tighter text-foreground tabular-nums">
+            #{String(ticketId).padStart(3, "0")}
+          </div>
+          <p className="text-muted-foreground mt-3 text-sm">
+            Anota esse número, é a sua referência.
+          </p>
+        </div>
+
+        <CardContent className="px-8 pb-8 -mt-2">
+          <AnimatePresence mode="wait">
+            {isInProgress && (
+              <motion.div
+                key="inprogress"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6 text-center"
+              >
+                <div className="text-2xl font-semibold text-blue-300 tracking-tight mb-1">
+                  É a sua vez!
+                </div>
+                <p className="text-sm text-blue-200/80">
+                  O suporte já está cuidando do seu chamado agora.
+                </p>
+              </motion.div>
+            )}
+
+            {isDone && (
+              <motion.div
+                key="done"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6 text-center"
+              >
+                <div className="text-2xl font-semibold text-green-300 tracking-tight mb-1">
+                  Chamado concluído
+                </div>
+                <p className="text-sm text-green-200/80">
+                  Tudo certo. Se voltar a dar problema, é só abrir um novo.
+                </p>
+              </motion.div>
+            )}
+
+            {isPending && (
+              <motion.div
+                key="pending"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="rounded-2xl border border-border bg-background/40 p-6 text-center"
+              >
+                <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-widest text-muted-foreground mb-3">
+                  <Users className="w-3.5 h-3.5" />
+                  Sua posição na fila
+                </div>
+                <div className="text-5xl font-bold tracking-tighter text-foreground tabular-nums">
+                  {position ?? "—"}
+                  <span className="text-2xl text-muted-foreground/60 font-medium">º</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">
+                  {totalAhead === 0
+                    ? "Você é o próximo. Já já é a sua vez."
+                    : `${totalAhead} ${totalAhead === 1 ? "chamado na frente" : "chamados na frente"}.`}
+                </p>
+                <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-muted-foreground/70">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/60 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                  </span>
+                  Atualizando automaticamente
+                </div>
+              </motion.div>
+            )}
+
+            {isLoading && !data && (
+              <div className="rounded-2xl border border-border bg-background/40 p-6 text-center text-muted-foreground text-sm">
+                Carregando posição na fila...
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Notification opt-in */}
+          {isPending && notifPermission !== "unsupported" && (
+            <div className="mt-5">
+              {notifPermission === "default" && (
+                <button
+                  type="button"
+                  onClick={requestPermission}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary/20 transition-colors px-4 py-3 text-sm text-primary"
+                >
+                  <Bell className="w-4 h-4" />
+                  Quero ser avisado quando for a minha vez
+                </button>
+              )}
+              {notifPermission === "granted" && (
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Bell className="w-3.5 h-3.5 text-primary" />
+                  Vou te avisar aqui no navegador quando chegar a sua vez.
+                </div>
+              )}
+              {notifPermission === "denied" && (
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <BellOff className="w-3.5 h-3.5" />
+                  Notificações desativadas. Deixe esta aba aberta para acompanhar.
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Button variant="outline" className="flex-1" onClick={onReset}>
+              Abrir outro chamado
+            </Button>
+            <Link href="/" className="flex-1">
+              <Button variant="ghost" className="w-full">
+                Voltar ao início
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

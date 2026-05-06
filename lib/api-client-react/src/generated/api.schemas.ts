@@ -132,6 +132,38 @@ export interface UpdateTicketBody {
   screenshotUrl?: string | null;
 }
 
+export type TicketQueuePositionStatus =
+  (typeof TicketQueuePositionStatus)[keyof typeof TicketQueuePositionStatus];
+
+export const TicketQueuePositionStatus = {
+  pending: "pending",
+  in_progress: "in_progress",
+  done: "done",
+} as const;
+
+export type TicketQueuePositionPriority =
+  (typeof TicketQueuePositionPriority)[keyof typeof TicketQueuePositionPriority];
+
+export const TicketQueuePositionPriority = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  urgent: "urgent",
+} as const;
+
+/**
+ * Public queue snapshot. Intentionally omits PII so it can be polled without auth.
+ */
+export interface TicketQueuePosition {
+  id: number;
+  /** 1-based queue position; 0 if in_progress or done */
+  position: number;
+  totalAhead: number;
+  totalActive: number;
+  status: TicketQueuePositionStatus;
+  priority: TicketQueuePositionPriority;
+}
+
 export type TicketStatsByCategoryItem = {
   category: string;
   count: number;

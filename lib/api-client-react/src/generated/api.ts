@@ -21,6 +21,7 @@ import type {
   HealthStatus,
   ListTicketsParams,
   Ticket,
+  TicketQueuePosition,
   TicketStats,
   UpdateTicketBody,
 } from "./api.schemas";
@@ -359,6 +360,95 @@ export function useGetTicketStats<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetTicketStatsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns position by priority then arrival order. 0 means in_progress or done.
+ * @summary Get a ticket's current position in the queue
+ */
+export const getGetTicketQueuePositionUrl = (id: number) => {
+  return `/api/tickets/${id}/queue-position`;
+};
+
+export const getTicketQueuePosition = async (
+  id: number,
+  options?: RequestInit,
+): Promise<TicketQueuePosition> => {
+  return customFetch<TicketQueuePosition>(getGetTicketQueuePositionUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetTicketQueuePositionQueryKey = (id: number) => {
+  return [`/api/tickets/${id}/queue-position`] as const;
+};
+
+export const getGetTicketQueuePositionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTicketQueuePosition>>,
+  TError = ErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getTicketQueuePosition>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTicketQueuePositionQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTicketQueuePosition>>
+  > = ({ signal }) => getTicketQueuePosition(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTicketQueuePosition>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTicketQueuePositionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTicketQueuePosition>>
+>;
+export type GetTicketQueuePositionQueryError = ErrorType<void>;
+
+/**
+ * @summary Get a ticket's current position in the queue
+ */
+
+export function useGetTicketQueuePosition<
+  TData = Awaited<ReturnType<typeof getTicketQueuePosition>>,
+  TError = ErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getTicketQueuePosition>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTicketQueuePositionQueryOptions(id, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
