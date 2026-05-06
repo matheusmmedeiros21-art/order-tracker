@@ -6,8 +6,9 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 ## Product
 
-- HelpDesk interno em PT-BR. Apple-style.
+- HelpDesk interno em PT-BR. Apple.com light theme: bg branco, accents #0071E3, tipografia SF Pro stack, navbar glass com backdrop-blur (`.nav-glass`/`.is-scrolled`), cards `.card-soft`, botões pill (`.btn-pill-primary`/`-secondary`), seções `.bg-apple-gray` (#F5F5F7) e `.bg-hero-glow`. Tokens em `src/index.css`.
 - Rotas: `/` landing, `/novo-chamado` formulário, `/anydesk` tutorial, `/fila` board público em tempo real, `/admin` (gated `matheusfuza123`/`15224921`, `localStorage.helpdesk_admin_auth`).
+- Hero do landing tem **input de rastreamento** como CTA principal: usuário digita ID → salva em `localStorage.helpdesk_my_ticket` → navega pra `/fila` (que destaca a linha).
 - `/fila` consome `GET /tickets/queue` (público, sem PII além de primeiro nome) com refetch 5s; destaca o chamado próprio via `localStorage.helpdesk_my_ticket` salvo após envio do formulário.
 - Form aceita ID do AnyDesk e print do erro (comprimido client-side para JPEG ≤ 1600px). Servidor valida `screenshotUrl` como data URL `image/(jpeg|png|webp)`. Body limit Express: 12mb.
 - Admin lista chamados por chegada ou prioridade (urgent>high>medium>low, desempate por createdAt asc); badge AnyDesk copiável e modal do print.

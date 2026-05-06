@@ -1,18 +1,47 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { motion, useInView } from "framer-motion";
 import { Download, Monitor, ArrowRight, ArrowLeft, Apple, Check, Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+
+function GlassNav() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <nav className={`nav-glass fixed top-0 inset-x-0 z-50 ${scrolled ? "is-scrolled" : ""}`}>
+      <div className="max-w-6xl mx-auto px-6 md:px-10 h-12 flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] text-[#1d1d1f]/80 hover:text-[#1d1d1f] transition-colors">
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Voltar
+        </Link>
+        <Link href="/" className="text-[15px] font-medium tracking-tight text-[#1d1d1f]">
+          Suporte TI
+        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/fila" className="text-[13px] text-[#1d1d1f]/80 hover:text-[#1d1d1f] transition-colors">
+            Fila
+          </Link>
+          <Link href="/novo-chamado" className="text-[13px] text-[#0071E3] hover:underline">
+            Abrir chamado
+          </Link>
+        </div>
+      </div>
+    </nav>
+  );
+}
 
 const FadeIn = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 1, delay, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
@@ -71,53 +100,37 @@ export function AnydeskGuide() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white selection:bg-blue-500/30 overflow-x-hidden font-sans">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 px-6 py-6 md:px-12 flex justify-between items-center backdrop-blur-md bg-[#020617]/60 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Voltar
-        </Link>
-        <div className="font-semibold text-lg tracking-tight">Central de Suporte TI</div>
-        <div className="flex items-center gap-6">
-          <Link href="/fila" className="text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
-            Fila
-          </Link>
-          <Link href="/novo-chamado" className="text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
-            Abrir chamado
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white text-[#1d1d1f] selection:bg-[#0071E3]/15 overflow-x-hidden font-sans">
+      <GlassNav />
 
       {/* Hero */}
-      <section className="relative pt-40 pb-32 px-6 md:px-12 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[700px] bg-blue-600/20 blur-[140px] rounded-full pointer-events-none" />
+      <section className="relative pt-32 pb-24 md:pt-40 md:pb-32 px-6 md:px-12 overflow-hidden bg-hero-glow">
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs uppercase tracking-widest text-slate-400 mb-8"
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-black/[0.06] text-[11px] uppercase tracking-widest text-[#0071E3] mb-8 shadow-sm"
           >
             <Download className="w-3.5 h-3.5" />
             Guia rápido
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl md:text-7xl lg:text-[7.5rem] font-bold tracking-tighter leading-[0.9] mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-5xl md:text-7xl lg:text-[7rem] font-semibold tracking-[-0.04em] leading-[0.95] mb-6 text-[#1d1d1f]"
           >
             Instale o AnyDesk. <br />
-            <span className="text-slate-500">É rápido.</span>
+            <span className="text-[#86868b]">É rápido.</span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-lg md:text-2xl text-slate-400 max-w-2xl mx-auto font-light tracking-tight"
+            transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="text-lg md:text-2xl text-[#6e6e73] max-w-2xl mx-auto font-normal tracking-tight"
           >
             Com o AnyDesk eu consigo acessar seu computador de longe e resolver o problema sem você sair da cadeira.
           </motion.p>
@@ -125,24 +138,24 @@ export function AnydeskGuide() {
       </section>
 
       {/* Download cards */}
-      <section className="px-6 md:px-12 pb-32">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="px-6 md:px-12 pb-24">
+        <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
           {downloads.map((d, i) => (
             <FadeIn key={d.os} delay={i * 0.1}>
               <a
                 href={d.href}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="group block p-8 rounded-3xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-blue-500/40 transition-all duration-500 hover:scale-[1.02]"
+                className="card-soft block p-7 rounded-[20px] group"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-11 h-11 rounded-2xl bg-[#0071E3]/10 text-[#0071E3] flex items-center justify-center group-hover:scale-110 transition-transform">
                     {d.icon}
                   </div>
-                  <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-[#86868b] group-hover:text-[#0071E3] group-hover:translate-x-0.5 transition-all" />
                 </div>
-                <div className="text-sm uppercase tracking-widest text-slate-500 mb-2">{d.os}</div>
-                <div className="text-2xl font-semibold tracking-tight">{d.label}</div>
+                <div className="text-[11px] uppercase tracking-widest text-[#86868b] mb-1.5">{d.os}</div>
+                <div className="text-xl font-semibold tracking-tight text-[#1d1d1f]">{d.label}</div>
               </a>
             </FadeIn>
           ))}
@@ -150,22 +163,22 @@ export function AnydeskGuide() {
       </section>
 
       {/* Steps */}
-      <section className="py-32 px-6 md:px-12 bg-slate-900/40 border-y border-white/5">
-        <div className="max-w-6xl mx-auto">
+      <section className="py-24 md:py-32 px-6 md:px-12 bg-apple-gray">
+        <div className="max-w-5xl mx-auto">
           <FadeIn>
-            <h2 className="text-4xl md:text-7xl font-bold tracking-tighter mb-24 text-center">
+            <h2 className="text-4xl md:text-6xl font-semibold tracking-[-0.035em] mb-16 text-center text-[#1d1d1f]">
               Em 4 passos. <br />
-              <span className="text-slate-500">Sem mistério.</span>
+              <span className="text-[#86868b]">Sem mistério.</span>
             </h2>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {steps.map((s, i) => (
               <FadeIn key={s.n} delay={i * 0.08}>
-                <div className="h-full p-10 rounded-3xl bg-gradient-to-br from-white/[0.04] to-transparent border border-white/10">
-                  <div className="text-5xl font-medium tracking-tighter text-blue-500 mb-6">{s.n}</div>
-                  <h3 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4">{s.title}</h3>
-                  <p className="text-slate-400 font-light leading-relaxed text-lg">{s.body}</p>
+                <div className="card-soft h-full p-8 rounded-[20px]">
+                  <div className="text-[13px] font-mono tracking-widest text-[#0071E3] mb-5">{s.n}</div>
+                  <h3 className="text-xl md:text-2xl font-semibold tracking-tight mb-2 text-[#1d1d1f]">{s.title}</h3>
+                  <p className="text-[#6e6e73] leading-relaxed text-[15px]">{s.body}</p>
                 </div>
               </FadeIn>
             ))}
@@ -174,28 +187,28 @@ export function AnydeskGuide() {
       </section>
 
       {/* Address example */}
-      <section className="py-32 px-6 md:px-12">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-24 md:py-32 px-6 md:px-12">
+        <div className="max-w-3xl mx-auto text-center">
           <FadeIn>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-6">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-[-0.035em] mb-4 text-[#1d1d1f]">
               É assim que o endereço aparece.
             </h2>
-            <p className="text-lg text-slate-400 mb-12 font-light max-w-xl mx-auto">
+            <p className="text-lg text-[#6e6e73] mb-10 font-normal max-w-xl mx-auto">
               Um número de 9 dígitos, separado em três blocos. É esse que você cola no chamado.
             </p>
 
             <button
               onClick={copyExample}
-              className="group inline-flex items-center gap-4 px-10 py-8 rounded-3xl bg-gradient-to-br from-blue-500/10 to-indigo-500/5 border border-blue-500/30 hover:border-blue-500/60 transition-all"
+              className="card-soft group inline-flex items-center gap-5 px-8 py-6 rounded-[22px]"
             >
-              <div className="text-4xl md:text-6xl font-mono font-medium tracking-tighter text-white">
+              <div className="text-3xl md:text-5xl font-mono font-medium tracking-tight text-[#1d1d1f]">
                 123 456 789
               </div>
-              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-slate-300 group-hover:bg-white/10 transition-colors">
-                {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
+              <div className="w-10 h-10 rounded-full bg-[#0071E3]/10 flex items-center justify-center text-[#0071E3] group-hover:bg-[#0071E3]/15 transition-colors">
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </div>
             </button>
-            <p className="text-xs text-slate-500 mt-4 tracking-wide">
+            <p className="text-[12px] text-[#86868b] mt-3 tracking-wide">
               {copied ? "Exemplo copiado" : "Clique para copiar o exemplo"}
             </p>
           </FadeIn>
@@ -203,30 +216,26 @@ export function AnydeskGuide() {
       </section>
 
       {/* CTA */}
-      <section className="py-40 px-6 md:px-12 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/15 blur-[140px] rounded-full pointer-events-none" />
-
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
+      <section className="py-28 md:py-40 px-6 md:px-12 bg-apple-gray">
+        <div className="max-w-3xl mx-auto text-center">
           <FadeIn>
-            <h2 className="text-4xl md:text-7xl font-bold tracking-tighter mb-8 leading-tight">
+            <h2 className="text-4xl md:text-6xl font-semibold tracking-[-0.04em] mb-8 leading-[0.98] text-[#1d1d1f]">
               Tudo certo? <br />
               Bora abrir o chamado.
             </h2>
             <Link href="/novo-chamado">
-              <Button
-                size="lg"
-                className="h-16 px-12 text-xl rounded-full bg-white text-black hover:bg-slate-200 hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.2)]"
-              >
-                Tenho um problema
-              </Button>
+              <button className="btn-pill btn-pill-primary text-[17px] px-7 py-3.5">
+                Abrir chamado
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </Link>
           </FadeIn>
         </div>
       </section>
 
-      <footer className="py-12 px-6 md:px-12 border-t border-slate-800/50 text-center text-slate-500 text-sm font-light">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>Central de Suporte TI &middot; uso interno</div>
+      <footer className="py-10 px-6 md:px-12 border-t border-black/[0.06] text-center text-[#86868b] text-[12px]">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+          <div>Central de Suporte TI · uso interno</div>
           <div>{new Date().getFullYear()}</div>
         </div>
       </footer>

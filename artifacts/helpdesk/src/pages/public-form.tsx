@@ -62,6 +62,32 @@ async function fileToCompressedDataUrl(file: File): Promise<string> {
   return canvas.toDataURL("image/jpeg", 0.78);
 }
 
+function GlassNav() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <nav className={`nav-glass fixed top-0 inset-x-0 z-50 ${scrolled ? "is-scrolled" : ""}`}>
+      <div className="max-w-6xl mx-auto px-6 md:px-10 h-12 flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] text-[#1d1d1f]/80 hover:text-[#1d1d1f] transition-colors">
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Voltar
+        </Link>
+        <Link href="/" className="text-[15px] font-medium tracking-tight text-[#1d1d1f]">
+          Suporte TI
+        </Link>
+        <Link href="/fila" className="text-[13px] text-[#0071E3] hover:underline">
+          Ver fila
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
 export function PublicForm() {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
@@ -142,12 +168,12 @@ export function PublicForm() {
   }
 
   const categoryIcons: Record<string, React.ReactNode> = {
-    [CreateTicketBodyCategory.computer]: <Monitor className="w-5 h-5 text-blue-400" />,
-    [CreateTicketBodyCategory.printer]: <Printer className="w-5 h-5 text-orange-400" />,
-    [CreateTicketBodyCategory.network]: <Network className="w-5 h-5 text-indigo-400" />,
-    [CreateTicketBodyCategory.software]: <FileCode className="w-5 h-5 text-violet-400" />,
-    [CreateTicketBodyCategory.phone]: <Phone className="w-5 h-5 text-green-400" />,
-    [CreateTicketBodyCategory.other]: <HelpCircle className="w-5 h-5 text-slate-400" />,
+    [CreateTicketBodyCategory.computer]: <Monitor className="w-5 h-5" />,
+    [CreateTicketBodyCategory.printer]: <Printer className="w-5 h-5" />,
+    [CreateTicketBodyCategory.network]: <Network className="w-5 h-5" />,
+    [CreateTicketBodyCategory.software]: <FileCode className="w-5 h-5" />,
+    [CreateTicketBodyCategory.phone]: <Phone className="w-5 h-5" />,
+    [CreateTicketBodyCategory.other]: <HelpCircle className="w-5 h-5" />,
   };
 
   const priorityLabels: Record<string, string> = {
@@ -161,38 +187,27 @@ export function PublicForm() {
     [CreateTicketBodyCategory.computer]: "Computador",
     [CreateTicketBodyCategory.printer]: "Impressora",
     [CreateTicketBodyCategory.network]: "Rede/Internet",
-    [CreateTicketBodyCategory.software]: "Sistema/Software",
+    [CreateTicketBodyCategory.software]: "Sistema",
     [CreateTicketBodyCategory.phone]: "Telefonia",
     [CreateTicketBodyCategory.other]: "Outros",
   };
 
   return (
-    <div className="min-h-screen w-full bg-background flex flex-col items-center py-12 px-4 sm:px-6 relative overflow-hidden">
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
-
-      <Link
-        href="/"
-        className="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Voltar
-      </Link>
+    <div className="min-h-screen w-full bg-white text-[#1d1d1f] flex flex-col items-center pt-32 pb-16 px-4 sm:px-6 relative overflow-hidden font-sans bg-hero-glow">
+      <GlassNav />
 
       <div className="w-full max-w-2xl z-10">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10"
         >
-          <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4 text-primary ring-1 ring-primary/20">
-            <Monitor className="w-8 h-8" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
-            Central de Suporte TI
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f] mb-3">
+            Conta o que aconteceu.
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Conta o que aconteceu que eu já começo a olhar.
+          <p className="text-[#6e6e73] text-lg font-normal">
+            Quanto antes você abrir, antes eu resolvo.
           </p>
         </motion.div>
 
@@ -200,15 +215,15 @@ export function PublicForm() {
           {!submitted ? (
             <motion.div
               key="form"
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+              exit={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-xl">
+              <Card className="card-soft rounded-[20px] border-transparent shadow-none">
                 <CardHeader>
-                  <CardTitle className="text-xl">Novo Chamado</CardTitle>
-                  <CardDescription>Preencha os detalhes do problema</CardDescription>
+                  <CardTitle className="text-xl font-semibold text-[#1d1d1f]">Novo chamado</CardTitle>
+                  <CardDescription className="text-[#6e6e73]">Preencha os detalhes do problema</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Form {...form}>
@@ -219,9 +234,9 @@ export function PublicForm() {
                           name="requesterName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Seu Nome</FormLabel>
+                              <FormLabel>Seu nome</FormLabel>
                               <FormControl>
-                                <Input placeholder="Ex: Maria Silva" {...field} className="bg-background/50" />
+                                <Input placeholder="Ex: Maria Silva" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -232,9 +247,9 @@ export function PublicForm() {
                           name="requesterEmail"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>E-mail (Opcional)</FormLabel>
+                              <FormLabel>E-mail (opcional)</FormLabel>
                               <FormControl>
-                                <Input placeholder="Ex: maria@empresa.com" {...field} className="bg-background/50" />
+                                <Input placeholder="Ex: maria@empresa.com" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -258,10 +273,10 @@ export function PublicForm() {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => field.onChange(cat)}
-                                    className={`relative flex flex-col items-center justify-center p-4 rounded-xl border text-sm transition-all duration-200 ${
+                                    className={`relative flex flex-col items-center justify-center p-4 rounded-2xl border text-sm transition-all duration-200 ${
                                       isSelected
-                                        ? "border-primary bg-primary/10 text-primary shadow-sm shadow-primary/20"
-                                        : "border-border hover:border-border/80 hover:bg-muted/50 text-muted-foreground"
+                                        ? "border-[#0071E3] bg-[#0071E3]/[0.06] text-[#0071E3]"
+                                        : "border-black/[0.08] hover:border-black/20 hover:bg-black/[0.02] text-[#6e6e73]"
                                     }`}
                                   >
                                     <div className="mb-2">{categoryIcons[cat]}</div>
@@ -269,7 +284,7 @@ export function PublicForm() {
                                     {isSelected && (
                                       <motion.div
                                         layoutId="category-selection"
-                                        className="absolute inset-0 rounded-xl border-2 border-primary pointer-events-none"
+                                        className="absolute inset-0 rounded-2xl border-2 border-[#0071E3] pointer-events-none"
                                         initial={false}
                                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                       />
@@ -291,7 +306,7 @@ export function PublicForm() {
                             <FormLabel>Prioridade</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
-                                <SelectTrigger className="bg-background/50">
+                                <SelectTrigger>
                                   <SelectValue placeholder="Selecione a prioridade" />
                                 </SelectTrigger>
                               </FormControl>
@@ -299,7 +314,7 @@ export function PublicForm() {
                                 {Object.values(CreateTicketBodyPriority).map((pri) => (
                                   <SelectItem key={pri} value={pri}>
                                     <div className="flex items-center">
-                                      <span className={`w-2 h-2 rounded-full mr-2 ${pri === 'urgent' ? 'bg-red-500' : pri === 'high' ? 'bg-orange-500' : pri === 'medium' ? 'bg-yellow-500' : 'bg-slate-500'}`} />
+                                      <span className={`w-2 h-2 rounded-full mr-2 ${pri === 'urgent' ? 'bg-red-500' : pri === 'high' ? 'bg-orange-500' : pri === 'medium' ? 'bg-yellow-500' : 'bg-slate-400'}`} />
                                       {priorityLabels[pri]}
                                     </div>
                                   </SelectItem>
@@ -316,9 +331,9 @@ export function PublicForm() {
                         name="location"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Local / Mesa (Opcional)</FormLabel>
+                            <FormLabel>Local / mesa (opcional)</FormLabel>
                             <FormControl>
-                              <Input placeholder="Ex: Mesa 12, 2º Andar" {...field} className="bg-background/50" />
+                              <Input placeholder="Ex: Mesa 12, 2º andar" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -330,18 +345,18 @@ export function PublicForm() {
                         name="anydeskId"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Endereço do AnyDesk (Opcional)</FormLabel>
+                            <FormLabel>Endereço do AnyDesk (opcional)</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="Ex: 123 456 789"
                                 inputMode="numeric"
                                 {...field}
-                                className="bg-background/50 font-mono tracking-wider"
+                                className="font-mono tracking-wider"
                               />
                             </FormControl>
                             <Link
                               href="/anydesk"
-                              className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors mt-2"
+                              className="inline-flex items-center gap-1.5 text-xs text-[#0071E3] hover:underline mt-2"
                             >
                               <HelpingHand className="w-3.5 h-3.5" />
                               Não tem AnyDesk baixado? Veja como baixar
@@ -356,11 +371,11 @@ export function PublicForm() {
                         name="description"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Descrição do Problema</FormLabel>
+                            <FormLabel>Descrição do problema</FormLabel>
                             <FormControl>
                               <Textarea
                                 placeholder="Detalhe o que está acontecendo..."
-                                className="min-h-[120px] resize-none bg-background/50"
+                                className="min-h-[120px] resize-none"
                                 {...field}
                               />
                             </FormControl>
@@ -370,7 +385,7 @@ export function PublicForm() {
                       />
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium leading-none">Print do Erro (Opcional)</label>
+                        <label className="text-sm font-medium leading-none text-[#1d1d1f]">Print do erro (opcional)</label>
                         <input
                           ref={fileInputRef}
                           type="file"
@@ -384,16 +399,16 @@ export function PublicForm() {
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={imageProcessing}
-                            className="w-full flex flex-col items-center justify-center gap-3 py-8 px-4 rounded-xl border border-dashed border-border bg-background/40 hover:bg-background/60 hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                            className="w-full flex flex-col items-center justify-center gap-3 py-8 px-4 rounded-2xl border border-dashed border-black/[0.12] bg-[#f5f5f7]/60 hover:bg-[#f5f5f7] hover:border-[#0071E3]/40 transition-colors text-[#6e6e73] hover:text-[#1d1d1f] disabled:opacity-50"
                           >
-                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <div className="w-12 h-12 rounded-full bg-[#0071E3]/10 flex items-center justify-center text-[#0071E3]">
                               <ImagePlus className="w-5 h-5" />
                             </div>
                             <div className="text-center">
                               <div className="text-sm font-medium">
                                 {imageProcessing ? "Processando..." : "Clique para anexar uma imagem"}
                               </div>
-                              <div className="text-xs text-muted-foreground/70 mt-1">
+                              <div className="text-xs text-[#86868b] mt-1">
                                 PNG, JPG até 8 MB
                               </div>
                             </div>
@@ -402,13 +417,13 @@ export function PublicForm() {
                           <motion.div
                             initial={{ opacity: 0, scale: 0.96 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="relative rounded-xl overflow-hidden border border-border bg-background/40"
+                            className="relative rounded-2xl overflow-hidden border border-black/[0.08] bg-[#f5f5f7]"
                           >
-                            <img src={screenshot} alt="Print do erro" className="w-full max-h-80 object-contain bg-black/40" />
+                            <img src={screenshot} alt="Print do erro" className="w-full max-h-80 object-contain bg-white" />
                             <button
                               type="button"
                               onClick={clearScreenshot}
-                              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/70 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/90 transition-colors"
+                              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md text-[#1d1d1f] flex items-center justify-center hover:bg-white transition-colors shadow-md"
                               aria-label="Remover imagem"
                             >
                               <X className="w-4 h-4" />
@@ -419,7 +434,7 @@ export function PublicForm() {
 
                       <Button
                         type="submit"
-                        className="w-full text-base py-6"
+                        className="w-full text-base py-6 rounded-full bg-[#0071E3] hover:bg-[#0066cc] text-white shadow-[0_4px_14px_rgba(0,113,227,0.25)]"
                         disabled={createTicketMutation.isPending || imageProcessing}
                       >
                         {createTicketMutation.isPending ? (
@@ -434,7 +449,7 @@ export function PublicForm() {
                           </span>
                         ) : (
                           <span className="flex items-center gap-2">
-                            Abrir Chamado <ArrowRight className="w-5 h-5" />
+                            Abrir chamado <ArrowRight className="w-5 h-5" />
                           </span>
                         )}
                       </Button>
@@ -510,40 +525,40 @@ function SuccessPanel({ ticketId, onReset }: { ticketId: number; onReset: () => 
   return (
     <motion.div
       key="success"
-      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      initial={{ opacity: 0, scale: 0.96, y: 16 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.4, type: "spring" }}
     >
-      <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-xl overflow-hidden">
+      <Card className="card-soft rounded-[20px] border-transparent shadow-none overflow-hidden">
         <div
           className={`relative px-8 pt-10 pb-12 text-center transition-colors duration-700 ${
             isInProgress
-              ? "bg-gradient-to-b from-blue-500/20 via-blue-500/5 to-transparent"
+              ? "bg-gradient-to-b from-[#0071E3]/10 via-[#0071E3]/[0.04] to-transparent"
               : isDone
-                ? "bg-gradient-to-b from-green-500/20 via-green-500/5 to-transparent"
-                : "bg-gradient-to-b from-primary/15 via-primary/5 to-transparent"
+                ? "bg-gradient-to-b from-green-500/10 via-green-500/[0.04] to-transparent"
+                : "bg-gradient-to-b from-[#0071E3]/8 via-[#0071E3]/[0.03] to-transparent"
           }`}
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.1, type: "spring", bounce: 0.5 }}
-            className={`inline-flex w-16 h-16 rounded-full items-center justify-center mb-5 ${
+            className={`inline-flex w-14 h-14 rounded-full items-center justify-center mb-5 ${
               isInProgress
-                ? "bg-blue-500/20 text-blue-400"
+                ? "bg-[#0071E3]/15 text-[#0071E3]"
                 : isDone
-                  ? "bg-green-500/20 text-green-400"
-                  : "bg-primary/20 text-primary"
+                  ? "bg-green-500/15 text-green-600"
+                  : "bg-[#0071E3]/15 text-[#0071E3]"
             }`}
           >
-            {isInProgress ? <Sparkles className="w-7 h-7" /> : isDone ? <CheckCircle2 className="w-7 h-7" /> : <CheckCircle2 className="w-7 h-7" />}
+            {isInProgress ? <Sparkles className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
           </motion.div>
 
-          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">Seu chamado</div>
-          <div className="text-6xl md:text-7xl font-bold tracking-tighter text-foreground tabular-nums">
+          <div className="text-[11px] uppercase tracking-[0.2em] text-[#86868b] mb-2 font-medium">Seu chamado</div>
+          <div className="text-6xl md:text-7xl font-semibold tracking-[-0.04em] text-[#1d1d1f] tabular-nums">
             #{String(ticketId).padStart(3, "0")}
           </div>
-          <p className="text-muted-foreground mt-3 text-sm">
+          <p className="text-[#86868b] mt-3 text-sm">
             Anota esse número, é a sua referência.
           </p>
         </div>
@@ -553,15 +568,15 @@ function SuccessPanel({ ticketId, onReset }: { ticketId: number; onReset: () => 
             {isInProgress && (
               <motion.div
                 key="inprogress"
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6 text-center"
+                className="rounded-2xl border border-[#0071E3]/20 bg-[#0071E3]/[0.06] p-6 text-center"
               >
-                <div className="text-2xl font-semibold text-blue-300 tracking-tight mb-1">
+                <div className="text-2xl font-semibold text-[#0071E3] tracking-tight mb-1">
                   É a sua vez!
                 </div>
-                <p className="text-sm text-blue-200/80">
+                <p className="text-sm text-[#0071E3]/80">
                   O suporte já está cuidando do seu chamado agora.
                 </p>
               </motion.div>
@@ -570,15 +585,15 @@ function SuccessPanel({ ticketId, onReset }: { ticketId: number; onReset: () => 
             {isDone && (
               <motion.div
                 key="done"
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6 text-center"
+                className="rounded-2xl border border-green-500/20 bg-green-500/[0.06] p-6 text-center"
               >
-                <div className="text-2xl font-semibold text-green-300 tracking-tight mb-1">
+                <div className="text-2xl font-semibold text-green-700 tracking-tight mb-1">
                   Chamado concluído
                 </div>
-                <p className="text-sm text-green-200/80">
+                <p className="text-sm text-green-700/80">
                   Tudo certo. Se voltar a dar problema, é só abrir um novo.
                 </p>
               </motion.div>
@@ -587,28 +602,28 @@ function SuccessPanel({ ticketId, onReset }: { ticketId: number; onReset: () => 
             {isPending && (
               <motion.div
                 key="pending"
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="rounded-2xl border border-border bg-background/40 p-6 text-center"
+                className="rounded-2xl border border-black/[0.08] bg-[#f5f5f7] p-6 text-center"
               >
-                <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-widest text-muted-foreground mb-3">
+                <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-widest text-[#86868b] mb-3 font-medium">
                   <Users className="w-3.5 h-3.5" />
                   Sua posição na fila
                 </div>
-                <div className="text-5xl font-bold tracking-tighter text-foreground tabular-nums">
+                <div className="text-5xl font-semibold tracking-[-0.04em] text-[#1d1d1f] tabular-nums">
                   {position ?? "—"}
-                  <span className="text-2xl text-muted-foreground/60 font-medium">º</span>
+                  <span className="text-2xl text-[#86868b] font-medium">º</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-3">
+                <p className="text-sm text-[#6e6e73] mt-3">
                   {totalAhead === 0
                     ? "Você é o próximo. Já já é a sua vez."
                     : `${totalAhead} ${totalAhead === 1 ? "chamado na frente" : "chamados na frente"}.`}
                 </p>
-                <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-muted-foreground/70">
+                <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-[#86868b]">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/60 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0071E3]/60 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#0071E3]" />
                   </span>
                   Atualizando automaticamente
                 </div>
@@ -616,7 +631,7 @@ function SuccessPanel({ ticketId, onReset }: { ticketId: number; onReset: () => 
             )}
 
             {isLoading && !data && (
-              <div className="rounded-2xl border border-border bg-background/40 p-6 text-center text-muted-foreground text-sm">
+              <div className="rounded-2xl border border-black/[0.08] bg-[#f5f5f7] p-6 text-center text-[#86868b] text-sm">
                 Carregando posição na fila...
               </div>
             )}
@@ -629,20 +644,20 @@ function SuccessPanel({ ticketId, onReset }: { ticketId: number; onReset: () => 
                 <button
                   type="button"
                   onClick={requestPermission}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary/20 transition-colors px-4 py-3 text-sm text-primary"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-[#0071E3]/20 bg-[#0071E3]/[0.06] hover:bg-[#0071E3]/10 transition-colors px-4 py-3 text-sm text-[#0071E3] font-medium"
                 >
                   <Bell className="w-4 h-4" />
                   Quero ser avisado quando for a minha vez
                 </button>
               )}
               {notifPermission === "granted" && (
-                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <Bell className="w-3.5 h-3.5 text-primary" />
+                <div className="flex items-center justify-center gap-2 text-xs text-[#6e6e73]">
+                  <Bell className="w-3.5 h-3.5 text-[#0071E3]" />
                   Vou te avisar aqui no navegador quando chegar a sua vez.
                 </div>
               )}
               {notifPermission === "denied" && (
-                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center justify-center gap-2 text-xs text-[#86868b]">
                   <BellOff className="w-3.5 h-3.5" />
                   Notificações desativadas. Deixe esta aba aberta para acompanhar.
                 </div>
@@ -651,14 +666,17 @@ function SuccessPanel({ ticketId, onReset }: { ticketId: number; onReset: () => 
           )}
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <Button variant="outline" className="flex-1" onClick={onReset}>
-              Abrir outro chamado
-            </Button>
-            <Link href="/" className="flex-1">
-              <Button variant="ghost" className="w-full">
-                Voltar ao início
+            <Link href="/fila" className="flex-1">
+              <Button variant="outline" className="w-full rounded-full">
+                Ver a fila
               </Button>
             </Link>
+            <Button
+              className="flex-1 rounded-full bg-[#0071E3] hover:bg-[#0066cc] text-white"
+              onClick={onReset}
+            >
+              Abrir outro chamado
+            </Button>
           </div>
         </CardContent>
       </Card>

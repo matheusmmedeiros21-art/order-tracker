@@ -73,68 +73,60 @@
   --opaque-button-border-intensity: -8;
 
   --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-2: rgba(0,0,0, .06);
 
-  /* Light Theme */
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
-  
-  --border: 214 32% 91%;
-  
+  /* Apple Light Theme */
+  --background: 0 0% 100%;
+  --foreground: 240 6% 10%;
+
+  --border: 240 6% 90%;
+
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --card-border: 214 32% 91%;
-  
+  --card-foreground: 240 6% 10%;
+  --card-border: 240 6% 92%;
+
   --sidebar: 0 0% 100%;
-  --sidebar-foreground: 222 47% 11%;
-  --sidebar-border: 214 32% 91%;
-  --sidebar-primary: 222 47% 11%;
-  --sidebar-primary-foreground: 210 40% 98%;
-  --sidebar-accent: 210 40% 96%;
-  --sidebar-accent-foreground: 222 47% 11%;
-  --sidebar-ring: 221 83% 53%;
+  --sidebar-foreground: 240 6% 10%;
+  --sidebar-border: 240 6% 92%;
+  --sidebar-primary: 211 100% 45%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 6% 96%;
+  --sidebar-accent-foreground: 240 6% 10%;
+  --sidebar-ring: 211 100% 45%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --popover-border: 214 32% 91%;
-  
-  --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
-  
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
-  
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
-  
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
+  --popover-foreground: 240 6% 10%;
+  --popover-border: 240 6% 92%;
 
-  --input: 214 32% 91%;
-  --ring: 221 83% 53%;
+  --primary: 211 100% 45%;          /* #0071E3 Apple blue */
+  --primary-foreground: 0 0% 100%;
 
-  --chart-1: 221 83% 53%;
+  --secondary: 240 6% 96%;          /* #F5F5F7 Apple gray */
+  --secondary-foreground: 240 6% 10%;
+
+  --muted: 240 6% 96%;
+  --muted-foreground: 240 4% 46%;   /* #6e6e73 Apple subtitle */
+
+  --accent: 240 6% 96%;
+  --accent-foreground: 240 6% 10%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  --input: 240 6% 90%;
+  --ring: 211 100% 45%;
+
+  --chart-1: 211 100% 45%;
   --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
+  --chart-3: 197 37% 50%;
   --chart-4: 43 74% 66%;
   --chart-5: 27 87% 67%;
 
-  --app-font-sans: 'Inter', sans-serif;
+  --app-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --app-font-serif: Georgia, serif;
-  --app-font-mono: Menlo, monospace;
-  --radius: 0.5rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(202 89% 53% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(202 89% 53% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(202 89% 53% / 0.00), 0px 1px 2px -1px hsl(202 89% 53% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(202 89% 53% / 0.00), 0px 1px 2px -1px hsl(202 89% 53% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(202 89% 53% / 0.00), 0px 2px 4px -1px hsl(202 89% 53% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(202 89% 53% / 0.00), 0px 4px 6px -1px hsl(202 89% 53% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(202 89% 53% / 0.00), 0px 8px 10px -1px hsl(202 89% 53% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(202 89% 53% / 0.00);
-  --tracking-normal: 0em;
+  --app-font-mono: 'SF Mono', ui-monospace, Menlo, monospace;
+  --radius: 0.875rem;               /* 14px base */
+  --tracking-normal: -0.011em;
   --spacing: 0.25rem;
 
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
@@ -146,74 +138,152 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-.dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
-
-  --opaque-button-border-intensity: 9;
-
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
-
-  /* Deep Navy Theme */
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
-  
-  --border: 217 33% 17%;
-  
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-  --card-border: 217 33% 17%;
-  
-  --sidebar: 222 47% 11%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-border: 217 33% 17%;
-  --sidebar-primary: 221 83% 53%;
-  --sidebar-primary-foreground: 210 40% 98%;
-  --sidebar-accent: 217 33% 17%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-ring: 221 83% 53%;
-  
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
-  --popover-border: 217 33% 17%;
-  
-  --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
-  
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-  
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-  
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-
-  --input: 217 33% 17%;
-  --ring: 221 83% 53%;
-
-  --chart-1: 221 83% 53%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
-}
-
 @layer base {
   * {
     @apply border-border;
   }
 
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    letter-spacing: -0.011em;
+  }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.025em;
   }
 }
 
 @layer utilities {
+  /* === Apple-style glassmorphism utilities === */
+
+  /* Floating navbar — transparent at rest, frosted on scroll */
+  .nav-glass {
+    background: rgba(255, 255, 255, 0);
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+    border-bottom: 1px solid transparent;
+    transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+  }
+  .nav-glass.is-scrolled {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+  }
+
+  /* Frosted card */
+  .glass {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* Soft white card with elevated shadow */
+  .card-soft {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 8px 24px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .card-soft:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 16px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Apple subtle gray section background */
+  .bg-apple-gray {
+    background: #f5f5f7;
+  }
+
+  /* Subtle radial glow for hero */
+  .bg-hero-glow {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0, 113, 227, 0.12), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 30%, rgba(41, 151, 255, 0.08), transparent 60%),
+      #ffffff;
+  }
+
+  /* Pill button (Apple) */
+  .btn-pill {
+    border-radius: 980px;
+    padding: 0.875rem 1.75rem;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-pill:hover {
+    transform: scale(1.02);
+  }
+  .btn-pill:active {
+    transform: scale(0.98);
+  }
+  .btn-pill-primary {
+    background: hsl(var(--primary));
+    color: white;
+    box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25);
+  }
+  .btn-pill-primary:hover {
+    background: hsl(211 100% 40%);
+  }
+  .btn-pill-secondary {
+    background: transparent;
+    color: hsl(var(--primary));
+    border: 1px solid rgba(0, 113, 227, 0.3);
+  }
+  .btn-pill-secondary:hover {
+    background: rgba(0, 113, 227, 0.06);
+  }
+
+  /* Clean input (no heavy borders) */
+  .input-clean {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 0.875rem 1.125rem;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: hsl(var(--foreground));
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+  }
+  .input-clean::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+  .input-clean:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+  }
+
+  /* Reduced motion respects */
+  @media (prefers-reduced-motion: reduce) {
+    .nav-glass,
+    .card-soft,
+    .btn-pill,
+    .input-clean {
+      transition: none;
+    }
+  }
+
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
   }

@@ -32,43 +32,40 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white font-sans flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(59,130,246,0.18),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(99,102,241,0.12),transparent_55%)]" />
-
+    <div className="min-h-screen bg-white text-[#1d1d1f] font-sans flex items-center justify-center px-4 relative overflow-hidden bg-hero-glow">
       <Link
         href="/"
-        className="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors z-10"
+        className="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-2 text-sm text-[#1d1d1f]/70 hover:text-[#1d1d1f] transition-colors z-10"
       >
         <ArrowLeft className="w-4 h-4" />
         Voltar
       </Link>
 
       <motion.div
-        initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+        initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10 w-full max-w-md"
       >
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/30 mb-6">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-[#0071E3] flex items-center justify-center shadow-[0_8px_24px_rgba(0,113,227,0.3)] mb-6">
             <Lock className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70">
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-[-0.035em] text-[#1d1d1f]">
             Acesso restrito
           </h1>
-          <p className="text-slate-400 mt-3 text-center tracking-tight">
+          <p className="text-[#6e6e73] mt-3 text-center">
             Entre para gerenciar os chamados.
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-8 shadow-2xl"
+          className="card-soft rounded-[20px] p-8"
         >
           <div className="space-y-5">
             <div>
-              <label className="block text-xs font-medium tracking-wider uppercase text-slate-400 mb-2">
+              <label className="block text-xs font-medium tracking-wider uppercase text-[#86868b] mb-2">
                 Usuário
               </label>
               <Input
@@ -77,13 +74,13 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
                 autoFocus
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 h-12 rounded-xl focus-visible:ring-blue-500"
+                className="h-12 rounded-xl"
                 placeholder="seu.usuario"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium tracking-wider uppercase text-slate-400 mb-2">
+              <label className="block text-xs font-medium tracking-wider uppercase text-[#86868b] mb-2">
                 Senha
               </label>
               <Input
@@ -91,7 +88,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 h-12 rounded-xl focus-visible:ring-blue-500"
+                className="h-12 rounded-xl"
                 placeholder="••••••••"
               />
             </div>
@@ -100,7 +97,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+                className="flex items-center gap-2 text-sm text-red-600 bg-red-500/[0.08] border border-red-500/20 rounded-lg px-3 py-2"
               >
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {error}
@@ -110,14 +107,14 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
             <Button
               type="submit"
               disabled={loading || !username || !password}
-              className="w-full h-12 rounded-xl bg-white text-black hover:bg-white/90 font-medium tracking-tight text-base transition-all disabled:opacity-50"
+              className="w-full h-12 rounded-full bg-[#0071E3] hover:bg-[#0066cc] text-white font-medium text-base shadow-[0_4px_14px_rgba(0,113,227,0.25)] disabled:opacity-50"
             >
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </div>
         </form>
 
-        <p className="text-center text-xs text-slate-500 mt-6 tracking-tight">
+        <p className="text-center text-xs text-[#86868b] mt-6">
           Área exclusiva para a equipe de TI.
         </p>
       </motion.div>
@@ -138,7 +135,7 @@ export function Admin() {
   }
 
   if (authed === null) {
-    return <div className="min-h-screen bg-[#020617]" />;
+    return <div className="min-h-screen bg-white" />;
   }
 
   if (!authed) {
@@ -150,7 +147,7 @@ export function Admin() {
       <AdminDashboard />
       <button
         onClick={handleLogout}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors shadow-lg"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/80 border border-black/[0.08] backdrop-blur-xl text-sm text-[#1d1d1f] hover:bg-white transition-colors shadow-md"
         aria-label="Sair"
       >
         <LogOut className="w-4 h-4" />

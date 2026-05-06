@@ -37,6 +37,32 @@ function formatWaiting(iso: string, now: number): string {
   return `${d}d`;
 }
 
+function GlassNav() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <nav className={`nav-glass fixed top-0 inset-x-0 z-50 ${scrolled ? "is-scrolled" : ""}`}>
+      <div className="max-w-6xl mx-auto px-6 md:px-10 h-12 flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] text-[#1d1d1f]/80 hover:text-[#1d1d1f] transition-colors">
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Voltar
+        </Link>
+        <Link href="/" className="text-[15px] font-medium tracking-tight text-[#1d1d1f]">
+          Suporte TI
+        </Link>
+        <Link href="/novo-chamado" className="text-[13px] text-[#0071E3] hover:underline">
+          Abrir chamado
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
 export function QueueBoard() {
   const [now, setNow] = useState(() => Date.now());
   const [myTicketId, setMyTicketId] = useState<number | null>(null);
@@ -65,93 +91,81 @@ export function QueueBoard() {
   const totals = data?.totals;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white selection:bg-blue-500/30 overflow-x-hidden font-sans">
-      <nav className="fixed top-0 w-full z-50 px-6 py-6 md:px-12 flex justify-between items-center backdrop-blur-md bg-[#020617]/60 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Voltar
-        </Link>
-        <div className="font-semibold text-lg tracking-tight">Central de Suporte TI</div>
-        <Link href="/novo-chamado" className="text-sm tracking-tight opacity-70 hover:opacity-100 transition-opacity">
-          Abrir chamado
-        </Link>
-      </nav>
+    <div className="min-h-screen bg-white text-[#1d1d1f] selection:bg-[#0071E3]/15 overflow-x-hidden font-sans">
+      <GlassNav />
 
-      <section className="relative pt-36 pb-16 px-6 md:px-12 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-600/15 blur-[140px] rounded-full pointer-events-none" />
-
-        <div className="relative z-10 max-w-6xl mx-auto">
+      <section className="relative pt-32 pb-12 md:pt-40 px-6 md:px-12 bg-hero-glow">
+        <div className="relative z-10 max-w-5xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs uppercase tracking-widest text-slate-400 mb-8"
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-black/[0.06] text-[11px] uppercase tracking-widest text-[#0071E3] mb-6 shadow-sm"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400/70 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-400" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0071E3]/60 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#0071E3]" />
             </span>
             Ao vivo
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl md:text-7xl lg:text-[6.5rem] font-bold tracking-tighter leading-[0.95] mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-5xl md:text-7xl lg:text-[6rem] font-semibold tracking-[-0.04em] leading-[0.95] mb-4 text-[#1d1d1f]"
           >
             Fila de chamados.
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-lg md:text-xl text-slate-400 max-w-2xl font-light tracking-tight"
+            transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="text-lg md:text-xl text-[#6e6e73] max-w-2xl font-normal"
           >
             Acompanhe em tempo real quem está sendo atendido e quantos chamados estão na frente.
           </motion.p>
 
-          {/* Totals */}
-          <div className="grid grid-cols-3 gap-4 md:gap-6 mt-12">
+          <div className="grid grid-cols-3 gap-3 md:gap-4 mt-10">
             <StatCard
               label="Em atendimento"
               value={totals?.inProgress ?? 0}
-              accent="blue"
               icon={<Activity className="w-4 h-4" />}
+              accent="primary"
             />
             <StatCard
               label="Na fila"
               value={totals?.pending ?? 0}
-              accent="violet"
               icon={<Users className="w-4 h-4" />}
+              accent="violet"
             />
             <StatCard
               label="Concluídos hoje"
               value={totals?.doneToday ?? 0}
-              accent="green"
               icon={<CheckCircle2 className="w-4 h-4" />}
+              accent="green"
             />
           </div>
         </div>
       </section>
 
-      <section className="px-6 md:px-12 pb-32">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section className="px-6 md:px-12 pb-32 pt-10">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* In progress */}
-          <div className="rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/[0.08] to-transparent p-6 md:p-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="card-soft rounded-[20px] p-6 md:p-7">
+            <div className="flex items-center justify-between mb-5">
               <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-blue-300/80 mb-1">Sendo atendido</div>
-                <h2 className="text-2xl font-semibold tracking-tight">Agora</h2>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[#0071E3] mb-1 font-medium">Sendo atendido</div>
+                <h2 className="text-2xl font-semibold tracking-tight text-[#1d1d1f]">Agora</h2>
               </div>
-              <Sparkles className="w-5 h-5 text-blue-400" />
+              <Sparkles className="w-5 h-5 text-[#0071E3]" />
             </div>
 
             {inProgress.length === 0 ? (
               <EmptyState text="Ninguém em atendimento agora." subtle="Pode ser uma boa hora pra abrir o seu." />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <AnimatePresence initial={false}>
                   {inProgress.map((t) => (
                     <QueueRow
@@ -168,13 +182,13 @@ export function QueueBoard() {
           </div>
 
           {/* Pending */}
-          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent p-6 md:p-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="card-soft rounded-[20px] p-6 md:p-7">
+            <div className="flex items-center justify-between mb-5">
               <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Próximos da fila</div>
-                <h2 className="text-2xl font-semibold tracking-tight">Aguardando</h2>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[#86868b] mb-1 font-medium">Próximos da fila</div>
+                <h2 className="text-2xl font-semibold tracking-tight text-[#1d1d1f]">Aguardando</h2>
               </div>
-              <Users className="w-5 h-5 text-slate-400" />
+              <Users className="w-5 h-5 text-[#86868b]" />
             </div>
 
             {isLoading && pending.length === 0 ? (
@@ -182,7 +196,7 @@ export function QueueBoard() {
             ) : pending.length === 0 ? (
               <EmptyState text="A fila está vazia." subtle="Tudo em dia." />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <AnimatePresence initial={false}>
                   {pending.map((t) => (
                     <QueueRow
@@ -199,15 +213,15 @@ export function QueueBoard() {
         </div>
 
         {myTicketId !== null && (
-          <div className="max-w-6xl mx-auto mt-8 text-center text-xs text-slate-500">
+          <div className="max-w-5xl mx-auto mt-6 text-center text-[12px] text-[#86868b]">
             Seu chamado #{String(myTicketId).padStart(3, "0")} está destacado.
           </div>
         )}
       </section>
 
-      <footer className="py-12 px-6 md:px-12 border-t border-slate-800/50 text-center text-slate-500 text-sm font-light">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>Central de Suporte TI &middot; uso interno</div>
+      <footer className="py-10 px-6 md:px-12 border-t border-black/[0.06] text-center text-[#86868b] text-[12px]">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+          <div>Central de Suporte TI · uso interno</div>
           <div>{new Date().getFullYear()}</div>
         </div>
       </footer>
@@ -216,30 +230,30 @@ export function QueueBoard() {
 }
 
 function StatCard({
-  label, value, accent, icon,
+  label, value, icon, accent,
 }: {
   label: string;
   value: number;
-  accent: "blue" | "violet" | "green";
   icon: React.ReactNode;
+  accent: "primary" | "violet" | "green";
 }) {
-  const styles: Record<string, string> = {
-    blue: "border-blue-500/30 from-blue-500/15 text-blue-300",
-    violet: "border-violet-500/30 from-violet-500/15 text-violet-300",
-    green: "border-green-500/30 from-green-500/15 text-green-300",
+  const accentClass: Record<string, string> = {
+    primary: "text-[#0071E3]",
+    violet: "text-[#7c3aed]",
+    green: "text-[#16a34a]",
   };
   return (
-    <div className={`rounded-2xl border bg-gradient-to-br to-transparent p-5 md:p-6 ${styles[accent]}`}>
-      <div className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-80">
+    <div className="card-soft rounded-[18px] p-4 md:p-5">
+      <div className={`flex items-center gap-2 text-[11px] uppercase tracking-widest font-medium ${accentClass[accent]}`}>
         {icon}
         <span className="hidden sm:inline">{label}</span>
         <span className="sm:hidden">{label.split(" ")[0]}</span>
       </div>
       <motion.div
         key={value}
-        initial={{ opacity: 0, y: 6 }}
+        initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-4xl md:text-5xl font-bold tracking-tighter text-white mt-2 tabular-nums"
+        className="text-3xl md:text-4xl font-semibold tracking-[-0.03em] text-[#1d1d1f] mt-1.5 tabular-nums"
       >
         {value}
       </motion.div>
@@ -249,9 +263,9 @@ function StatCard({
 
 function EmptyState({ text, subtle }: { text: string; subtle?: string }) {
   return (
-    <div className="text-center py-12 text-slate-500">
-      <div className="text-base">{text}</div>
-      {subtle && <div className="text-xs mt-1 opacity-70">{subtle}</div>}
+    <div className="text-center py-10 text-[#86868b]">
+      <div className="text-[15px]">{text}</div>
+      {subtle && <div className="text-[12px] mt-1 opacity-80">{subtle}</div>}
     </div>
   );
 }
@@ -270,26 +284,26 @@ function QueueRow({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      initial={{ opacity: 0, y: 8, scale: 0.99 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
+      exit={{ opacity: 0, scale: 0.97 }}
       transition={{ type: "spring", stiffness: 220, damping: 26 }}
-      className={`relative flex items-center gap-4 p-4 rounded-2xl border transition-colors ${
+      className={`relative flex items-center gap-4 p-3.5 rounded-2xl border transition-colors ${
         isMine
-          ? "border-primary/60 bg-primary/10 ring-1 ring-primary/30"
+          ? "border-[#0071E3]/50 bg-[#0071E3]/[0.06] ring-1 ring-[#0071E3]/20"
           : highlight
-            ? "border-blue-500/30 bg-blue-500/[0.06]"
-            : "border-white/10 bg-white/[0.03]"
+            ? "border-[#0071E3]/20 bg-[#0071E3]/[0.04]"
+            : "border-black/[0.06] bg-[#f5f5f7]"
       }`}
     >
       {/* Position / status */}
-      <div className="flex-shrink-0 w-14 text-center">
+      <div className="flex-shrink-0 w-12 text-center">
         {ticket.status === "in_progress" ? (
-          <div className="text-[10px] uppercase tracking-widest text-blue-300 font-semibold">Agora</div>
+          <div className="text-[10px] uppercase tracking-widest text-[#0071E3] font-semibold">Agora</div>
         ) : (
-          <div className="text-2xl font-bold tracking-tighter tabular-nums text-white">
+          <div className="text-2xl font-semibold tracking-tight tabular-nums text-[#1d1d1f]">
             {ticket.position}
-            <span className="text-sm text-slate-500 font-medium">º</span>
+            <span className="text-sm text-[#86868b] font-medium">º</span>
           </div>
         )}
       </div>
@@ -297,21 +311,21 @@ function QueueRow({
       {/* Body */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-base font-medium text-white truncate">
+          <span className="text-[15px] font-medium text-[#1d1d1f] truncate">
             {ticket.firstName || "Anônimo"}
           </span>
           {isMine && (
-            <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+            <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#0071E3]/15 text-[#0071E3] border border-[#0071E3]/20 font-medium">
               Você
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3 mt-1 text-xs text-slate-400 flex-wrap">
+        <div className="flex items-center gap-3 mt-0.5 text-[12px] text-[#86868b] flex-wrap">
           <span className="inline-flex items-center gap-1">
             {categoryIcon[ticket.category]}
             {categoryLabel[ticket.category] ?? ticket.category}
           </span>
-          <span className="inline-flex items-center gap-1 text-slate-500">
+          <span className="inline-flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {formatWaiting(ticket.createdAt, now)}
           </span>
@@ -319,7 +333,7 @@ function QueueRow({
       </div>
 
       {/* Ticket id */}
-      <div className="hidden sm:block text-xs font-mono text-slate-500 tabular-nums">
+      <div className="hidden sm:block text-[11px] font-mono text-[#86868b] tabular-nums">
         #{String(ticket.id).padStart(3, "0")}
       </div>
     </motion.div>

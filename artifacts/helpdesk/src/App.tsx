@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 const queryClient = new QueryClient();
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState("dark"); // Force dark theme by default based on identity
+  const [theme] = useState("light");
 
   useEffect(() => {
     const root = window.document.documentElement;
