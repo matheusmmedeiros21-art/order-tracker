@@ -657,12 +657,14 @@ function WordsShowcase() {
     offset: ["start end", "end start"],
   });
 
-  // Phrase is pinned (sticky) for the entire section so it visibly
-  // follows the scroll. Subtle drift + scale + fade in/out at the edges.
-  const y       = useTransform(scrollYProgress, [0, 1], ["-6vh", "10vh"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.18, 0.82, 1], [0, 0.95, 0.95, 0]);
-  const scale   = useTransform(scrollYProgress, [0, 0.5, 1], [0.96, 1.02, 1.04]);
-  const blur    = useTransform(scrollYProgress, [0, 0.18, 0.82, 1], [6, 0, 0, 6]);
+  // Sticky window for a 200vh section with h-screen child:
+  //   pin engages around progress 0.33 and releases around 0.66.
+  // Fade ranges anchored to that window for a clean handoff with the
+  // previous (TicketFlow) and next blocks.
+  const y       = useTransform(scrollYProgress, [0.33, 0.66], ["-2vh", "4vh"]);
+  const opacity = useTransform(scrollYProgress, [0.22, 0.36, 0.64, 0.78], [0, 1, 1, 0]);
+  const scale   = useTransform(scrollYProgress, [0.33, 0.66], [0.97, 1.03]);
+  const blur    = useTransform(scrollYProgress, [0.22, 0.36, 0.64, 0.78], [10, 0, 0, 10]);
   const filter  = useTransform(blur, (b) => `blur(${b}px)`);
 
   if (reduceMotion) {
@@ -677,7 +679,7 @@ function WordsShowcase() {
   }
 
   return (
-    <section ref={containerRef} className="relative" style={{ height: "220vh" }}>
+    <section ref={containerRef} className="relative" style={{ height: "200vh" }}>
       {/* Sticky inner: pinned to viewport while the section scrolls past */}
       <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden pointer-events-none">
         <motion.div
