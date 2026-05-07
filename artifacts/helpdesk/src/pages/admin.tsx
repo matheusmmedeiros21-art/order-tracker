@@ -73,6 +73,8 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
                 Usuário
               </label>
               <Input
+                id="admin-username"
+                name="username"
                 type="text"
                 autoComplete="username"
                 autoFocus
@@ -88,6 +90,8 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
                 Senha
               </label>
               <Input
+                id="admin-password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 value={password}

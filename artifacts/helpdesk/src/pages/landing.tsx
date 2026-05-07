@@ -824,6 +824,8 @@ function TrackingInput() {
           <Search className="w-5 h-5" />
         </div>
         <input
+          id="ticket-number"
+          name="ticketNumber"
           inputMode="numeric"
           pattern="[0-9]*"
           autoComplete="off"

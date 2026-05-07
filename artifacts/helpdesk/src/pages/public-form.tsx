@@ -559,6 +559,8 @@ export function PublicForm() {
                       <div className="space-y-2">
                         <label className="text-sm font-medium leading-none text-[#1d1d1f]">Print do erro (opcional)</label>
                         <input
+                          id="screenshot-upload"
+                          name="screenshot"
                           ref={fileInputRef}
                           type="file"
                           accept="image/*"
