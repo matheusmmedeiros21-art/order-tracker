@@ -39,31 +39,9 @@ const corsOptions = {
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
-  optionsSuccessStatus: 200,
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 };
-
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization",
-  );
-
-  if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-    return;
-  }
-
-  next();
-});
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
