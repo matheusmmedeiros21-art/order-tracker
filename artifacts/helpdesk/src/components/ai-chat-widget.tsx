@@ -49,11 +49,13 @@ export function AiChatWidget() {
       { data: { messages: next } },
       {
         onSuccess: (r) => setMessages((curr) => [...curr, { role: "assistant", content: r.reply }]),
-        onError: () =>
+        onError: (error) => {
+          console.error("AI chat failed", error);
           setMessages((curr) => [
             ...curr,
             { role: "assistant", content: "Tive um problema agora. Tenta de novo em instantes." },
-          ]),
+          ]);
+        },
       },
     );
   }

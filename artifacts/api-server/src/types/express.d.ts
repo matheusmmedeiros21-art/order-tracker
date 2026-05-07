@@ -1,12 +1,9 @@
-import "express-serve-static-core";
+import pino from 'pino';
 
-declare module "express-serve-static-core" {
-  interface Request {
-    log: {
-      error: (...args: any[]) => void;
-      info: (...args: any[]) => void;
-      warn: (...args: any[]) => void;
-      debug: (...args: any[]) => void;
-    };
+declare global {
+  namespace Express {
+    interface Request {
+      log: pino.Logger;
+    }
   }
 }
