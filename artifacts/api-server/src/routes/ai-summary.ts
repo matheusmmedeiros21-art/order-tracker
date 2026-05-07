@@ -1,4 +1,6 @@
-import { Router, type IRouter } from "express";
+import { logger } from "../lib/logger";
+import { Router, type IRouter, type Request } from "express";
+import type { Logger } from "pino";
 import { eq } from "drizzle-orm";
 import { db, ticketsTable } from "@workspace/db";
 import OpenAI from "openai";
@@ -19,8 +21,10 @@ const CATEGORY_PT: Record<string, string> = {
   other: "Outro",
 };
 
-router.post("/tickets/:id/ai-summary", async (req, res): Promise<void> => {
-  const params = GetTicketAiSummaryParams.safeParse(req.params);
+router.post(
+  "/tickets/:id/ai-summary",
+  async (req: Request & { log: Logger }, res): Promise<void> => {
+    const params = GetTicketAiSummaryParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
     return;
@@ -111,7 +115,7 @@ Responda APENAS com JSON válido, nada mais. Não use markdown nem cercas de có
       }),
     );
   } catch (err) {
-    req.log.error({ err }, "AI summary failed");
+  logger.error({ err }, "AI summary failed");
     res.status(502).json({ error: "Falha ao gerar resumo com IA" });
   }
 });

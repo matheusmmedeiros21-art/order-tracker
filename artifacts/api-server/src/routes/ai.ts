@@ -15,6 +15,7 @@ import {
   AiChatResponse as AiChatResult,
   GetTicketAiSuggestedReplyParams,
 } from "@workspace/api-zod";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
@@ -95,7 +96,7 @@ Responda APENAS JSON válido.`,
       }),
     );
   } catch (err) {
-    req.log.error({ err }, "AI classify failed");
+    logger.error({ err }, "AI classify failed");
     res.status(502).json({ error: "Falha ao classificar com IA" });
   }
 });
@@ -134,7 +135,7 @@ Responda APENAS com o texto reescrito, sem aspas, sem markdown, sem prefixos com
     const improved = (completion.choices[0]?.message?.content ?? "").trim().replace(/^["']|["']$/g, "");
     res.json(AiImproveResult.parse({ improved: improved || text }));
   } catch (err) {
-    req.log.error({ err }, "AI improve failed");
+  logger.error({ err }, "AI improve failed");
     res.status(502).json({ error: "Falha ao melhorar descrição" });
   }
 });
@@ -221,7 +222,7 @@ ${JSON.stringify(candidates, null, 2)}`,
 
     res.json(AiFindDuplicatesResult.parse({ matches }));
   } catch (err) {
-    req.log.error({ err }, "AI duplicates failed");
+    logger.error({ err }, "AI duplicates failed");
     res.status(502).json({ error: "Falha ao buscar duplicatas" });
   }
 });
@@ -265,7 +266,7 @@ ${ticket.anydeskId ? `AnyDesk: ${ticket.anydeskId}` : ""}`,
     const reply = (completion.choices[0]?.message?.content ?? "").trim();
     res.json(AiSuggestedReply.parse({ ticketId: ticket.id, reply }));
   } catch (err) {
-    req.log.error({ err }, "AI reply failed");
+    logger.error({ err }, "AI reply failed");
     res.status(502).json({ error: "Falha ao gerar resposta" });
   }
 });
@@ -353,7 +354,7 @@ Foque em: surtos por categoria/local, chamados urgentes parados, padrões repeti
       }),
     );
   } catch (err) {
-    req.log.error({ err }, "AI insights failed");
+    logger.error({ err }, "AI insights failed");
     res.status(502).json({ error: "Falha ao gerar insights" });
   }
 });
@@ -389,7 +390,7 @@ Tom amigável, direto, sem markdown pesado. Máximo 4 frases por resposta. Se n�
     });
     res.json(AiChatResult.parse({ reply: (completion.choices[0]?.message?.content ?? "").trim() }));
   } catch (err) {
-    req.log.error({ err }, "AI chat failed");
+    logger.error({ err }, "AI chat failed");
     res.status(502).json({ error: "Falha no chat" });
   }
 });

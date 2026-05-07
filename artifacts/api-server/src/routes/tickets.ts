@@ -1,4 +1,6 @@
-import { Router, type IRouter } from "express";
+import { logger } from "../lib/logger";
+import { Router, type IRouter, type Request } from "express";
+import type { Logger } from "pino";
 import { eq, asc, desc, sql } from "drizzle-orm";
 import { db, ticketsTable } from "@workspace/db";
 import {
@@ -91,10 +93,12 @@ function validateScreenshot(value: string | null | undefined): { ok: true; value
   return { ok: true, value };
 }
 
-router.post("/tickets", async (req, res): Promise<void> => {
-  const parsed = CreateTicketBody.safeParse(req.body);
+router.post(
+  "/tickets",
+  async (req: Request & { log: Logger }, res): Promise<void> => {
+    const parsed = CreateTicketBody.safeParse(req.body);
   if (!parsed.success) {
-    req.log.warn({ errors: parsed.error.message }, "Invalid ticket body");
+    logger.warn({ errors: parsed.error.message }, "Invalid ticket body");
     res.status(400).json({ error: parsed.error.message });
     return;
   }
@@ -234,8 +238,10 @@ router.get("/tickets/:id", async (req, res): Promise<void> => {
   res.json(GetTicketResponse.parse(ticket));
 });
 
-router.patch("/tickets/:id", async (req, res): Promise<void> => {
-  const params = UpdateTicketParams.safeParse(req.params);
+router.patch(
+  "/tickets/:id",
+  async (req: Request & { log: Logger }, res): Promise<void> => {
+    const params = UpdateTicketParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
     return;
@@ -243,7 +249,7 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
 
   const parsed = UpdateTicketBody.safeParse(req.body);
   if (!parsed.success) {
-    req.log.warn({ errors: parsed.error.message }, "Invalid update body");
+    logger.warn({ errors: parsed.error.message }, "Invalid update body");
     res.status(400).json({ error: parsed.error.message });
     return;
   }

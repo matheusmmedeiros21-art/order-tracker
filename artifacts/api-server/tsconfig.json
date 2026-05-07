@@ -3,9 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "types": ["node"]
+    "types": ["node", "express"]
   },
-  "include": ["src"],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../../lib/db"
