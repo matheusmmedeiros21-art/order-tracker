@@ -28,10 +28,11 @@ if (!basePath && !isBuild) {
 
 export default defineConfig({
   base: basePath ?? "/",
+  logLevel: "error",
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
+    !isBuild && runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -45,7 +46,7 @@ export default defineConfig({
           ),
         ]
       : []),
-  ],
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
@@ -58,6 +59,7 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
     chunkSizeWarningLimit: 1500,
+    sourcemap: false,
   },
   server: {
     port,
