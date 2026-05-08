@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/:path*", "destination": "https://order-tracker-api-server-mvzjqx92.vercel.app/api/:path*" },
     { "source": "/admin", "destination": "/index.html" },
     { "source": "/novo-chamado", "destination": "/index.html" },
     { "source": "/anydesk", "destination": "/index.html" },

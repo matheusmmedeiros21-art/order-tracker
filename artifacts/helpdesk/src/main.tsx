@@ -4,7 +4,7 @@ import App from "./App";
 import "./index.css";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-if (apiBaseUrl) {
+if (!import.meta.env.PROD && apiBaseUrl) {
   setBaseUrl(apiBaseUrl);
 }
 
