@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/novo-chamado", "destination": "/index.html" },
+    { "source": "/anydesk", "destination": "/index.html" },
+    { "source": "/fila", "destination": "/index.html" }
+  ]
+}
